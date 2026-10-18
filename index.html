@@ -58,7 +58,7 @@
   </main>
   <dialog id="create-dialog" class="create-dialog">
     <form method="dialog" id="create-form">
-      <div class="dialog-head"><div><span class="eyebrow">PROMPTSIM STUDIO</span><h2>What are we making?</h2></div><button class="icon-btn" value="cancel" aria-label="Close">✕</button></div>
+      <div class="dialog-head"><div><span class="eyebrow">PROMPTSIM STUDIO</span><h2>What are we making?</h2></div><button class="icon-btn" id="close-create" type="button" aria-label="Close">✕</button></div>
       <label class="field-label" for="project-name">Project name</label><input id="project-name" class="field" maxlength="60" placeholder="A tiny world, a game, a tool..." required>
       <label class="field-label" for="project-prompt">Describe your idea</label><textarea id="project-prompt" class="field prompt-field" rows="4" placeholder="A dreamy low-poly island with glowing mushrooms..." required></textarea>
       <div class="dialog-note" id="create-note">Your title and prompt are saved only in this browser. No project is uploaded or shared.</div>
@@ -67,7 +67,7 @@
   </dialog>
   <dialog id="agent-dialog" class="create-dialog agent-dialog">
     <form method="dialog" id="agent-form">
-      <div class="dialog-head"><div><span class="eyebrow">AGENT PLAYGROUND · LOCAL DEMO</span><h2 id="agent-dialog-title">Cosmos Builder</h2><p id="agent-dialog-description" class="agent-dialog-description">Let's map your idea.</p></div><button class="icon-btn" value="cancel" aria-label="Close">✕</button></div>
+      <div class="dialog-head"><div><span class="eyebrow">AGENT PLAYGROUND · LOCAL DEMO</span><h2 id="agent-dialog-title">Cosmos Builder</h2><p id="agent-dialog-description" class="agent-dialog-description">Let's map your idea.</p></div><button class="icon-btn" id="close-agent" type="button" aria-label="Close">✕</button></div>
       <div class="agent-chat" id="agent-chat" aria-live="polite"><div class="chat-bubble assistant"><strong>Ready when you are.</strong><p>Describe a project and this demo will return a structured starter checklist.</p></div></div>
       <label class="field-label" for="agent-prompt">What should this agent work on?</label><textarea id="agent-prompt" class="field prompt-field" rows="3" placeholder="A galaxy-themed exploration game with strange planets..." required></textarea>
       <div class="dialog-note">Demo responses are generated in your browser. Connect a backend and AI provider to enable real AI reasoning.</div>
