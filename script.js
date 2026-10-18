@@ -6,7 +6,7 @@ const starterProjects = [
   {title:"Squad Game Multiplayer",author:"@kotsoft",avatar:"◉",symbol:"♟",category:"Multiplayer",tags:["Hot"],views:"11k",likes:"190",art:"squad",prompt:"A stylized multiplayer arena with small characters in a sandy environment."},
   {title:"Web Wave",author:"@waveform",avatar:"⌁",symbol:"➤",category:"Hot",tags:["Featured"],views:"7.1k",likes:"192",art:"wave",prompt:"A retro arcade experience with a neon waveform travelling over a dark grid."}
 ];
-const state = {filter:"Hot",view:"Home",query:"",sort:"Top · Month",custom:[],remixSource:null};
+const state = {filter:"Hot",view:"Home",query:"",sort:"Top · Month",custom:[],remixSource:null,studioFiles:{html:"",css:"",js:""},activeFile:"html",isGenerating:false};
 const gallery = document.getElementById("gallery");
 const search = document.getElementById("search");
 const dialog = document.getElementById("create-dialog");
@@ -55,17 +55,15 @@ function toast(message){const old=document.querySelector(".toast");if(old)old.re
 function showPreview(p){
   const d=document.createElement("dialog");
   d.className="create-dialog preview-dialog";
-  d.innerHTML=`<form method="dialog"><div class="dialog-head"><div><span class="eyebrow">PROJECT PREVIEW</span><h2>${escapeHtml(p.title)}</h2></div><button class="icon-btn" value="close" aria-label="Close">✕</button></div><img src="${p.image||svgData(p.art)}" alt="" style="width:100%;aspect-ratio:1.6;object-fit:cover;border-radius:10px;border:1px solid #444"><p style="color:#b8bec9;line-height:1.6">${escapeHtml(p.prompt||"A project created with PromptSim.")}</p>${p.inspiredBy?`<p class="attribution-note">Inspired by ${escapeHtml(p.inspiredBy.title)} by ${escapeHtml(p.inspiredBy.author)}. This is a separate project.</p>`:""}<p class="attribution-note">Creator credit stays attached. A remix begins with a fresh prompt instead of copying the source prompt or changing the original.</p><button class="create-btn" type="button" id="remix">✦ Create credited remix</button></form>`;
-  document.body.appendChild(d);
-  d.showModal();
-  d.addEventListener("close",()=>d.remove());
+  d.innerHTML=`<form method="dialog"><div class="dialog-head"><div><span class="eyebrow">COMMUNITY PROJECT</span><h2>${escapeHtml(p.title)}</h2></div><button class="icon-btn" value="close" aria-label="Close">✕</button></div><img src="${p.image||svgData(p.art)}" alt="" style="width:100%;aspect-ratio:1.6;object-fit:cover;border-radius:10px;border:1px solid #444"><p style="color:#b8bec9;line-height:1.6">Created by ${escapeHtml(p.author||"an unknown creator")}. Remixing starts a separate build and preserves inspiration credit.</p><button class="create-btn" type="button" id="remix">✦ Build an original inspired project</button></form>`;
+  document.body.appendChild(d);d.showModal();d.addEventListener("close",()=>d.remove());
   d.querySelector("#remix").addEventListener("click",()=>{
     d.close();
     state.remixSource={title:p.title,author:p.author||"Unknown creator"};
-    dialog.showModal();
-    document.getElementById("project-name").value="Remix: "+p.title;
-    document.getElementById("project-prompt").value=`Create an original project with different visuals and mechanics, inspired by the broad idea of "${p.title}". Do not copy the source project. My own twist: `;
-    document.getElementById("create-note").textContent=`This new project is saved locally and will display inspiration credit for ${p.title} by ${p.author||"Unknown creator"}.`;
+    document.getElementById("builder-prompt").value=`Build a new, original website or game that explores the broad theme of "${p.title}" by ${p.author||"an unknown creator"} as inspiration only. Do not copy the source project's code, layout, graphics, text, or exact mechanics. Invent a distinct visual identity and fresh interactions. Make it functional and polished. Include a small acknowledgement that this new project was inspired by ${p.title} by ${p.author||"an unknown creator"}.`;
+    state.view="Agents";render();
+    document.getElementById("builder-prompt").focus();
+    window.scrollTo({top:0,behavior:"smooth"});
   });
 }
 search.addEventListener("input",()=>{state.query=search.value;render();});
@@ -73,41 +71,234 @@ document.querySelectorAll(".filter[data-filter]").forEach(b=>b.addEventListener(
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{state.view=b.dataset.view;if(state.view==="Feed"){state.filter="All";}else if(state.view==="Home"){state.filter="Hot";}render();}));
 document.getElementById("reset-search").addEventListener("click",()=>{search.value="";state.query="";state.filter="Hot";render();});
 document.getElementById("sort-menu").addEventListener("click",()=>{const options=["Top · Month","Most liked","Newest"];const idx=options.indexOf(state.sort);state.sort=options[(idx+1)%options.length];document.querySelector("#sort-menu span:nth-child(2)").textContent=state.sort;render();});
-function openCreate(){state.remixSource=null;document.getElementById("create-note").textContent="Your title and prompt are saved only in this browser. No project is uploaded or shared.";dialog.showModal();}
-document.getElementById("close-create").addEventListener("click",()=>dialog.close());
-document.getElementById("open-create").addEventListener("click",openCreate);document.getElementById("rail-create").addEventListener("click",openCreate);
+function openCreate(){
+  state.view="Agents";render();
+  const prompt=document.getElementById("builder-prompt");
+  if(prompt)prompt.focus();
+}
+document.getElementById("open-create").addEventListener("click",openCreate);
+document.getElementById("rail-create").addEventListener("click",openCreate);
+
 document.getElementById("create-form").addEventListener("submit",e=>e.preventDefault());
 document.getElementById("make-project").addEventListener("click",e=>{const name=document.getElementById("project-name").value.trim();const prompt=document.getElementById("project-prompt").value.trim();if(!name||!prompt){e.preventDefault();toast("Add a project name and describe your idea first.");return;}const source=state.remixSource;const p={title:name,author:"@you",avatar:"✦",category:"New",tags:["For You"],views:"1",likes:"0",art:"custom",prompt,custom:true,inspiredBy:source?{title:source.title,author:source.author}:null,created:Date.now()};state.remixSource=null;state.custom.unshift(p);try{const saved=JSON.parse(localStorage.getItem("promptsim-projects")||"[]");saved.unshift({title:name,prompt,created:p.created,inspiredBy:p.inspiredBy});localStorage.setItem("promptsim-projects",JSON.stringify(saved.slice(0,30)));}catch{}state.view="Home";state.filter="New";search.value="";state.query="";dialog.close();document.getElementById("project-name").value="";document.getElementById("project-prompt").value="";render();toast("Project added to your gallery.");window.scrollTo({top:0,behavior:"smooth"});});
 try{const saved=JSON.parse(localStorage.getItem("promptsim-projects")||"[]");state.custom=saved.map(p=>({title:p.title,author:"@you",avatar:"✦",category:"New",tags:["For You"],views:"1",likes:"0",art:"custom",prompt:p.prompt,custom:true,inspiredBy:p.inspiredBy||null,created:p.created}));}catch{}
 
-const agentProfiles = {
-  cosmos:{name:"Cosmos Builder",desc:"Map a setting, its rules, locations, characters, and secrets.",placeholder:"A strange galaxy with five explorable planets...",steps:["Define the core concept and player goal","Map the world rules and key locations","Outline three original encounters","Choose a small first-build milestone"]},
-  code:{name:"Code Pilot",desc:"Turn a feature into a practical build plan.",placeholder:"A browser exploration game with a minimap...",steps:["Break the feature into small systems","Propose a clean file/component structure","List implementation milestones","Add a test and debugging checklist"]},
-  art:{name:"Art Director",desc:"Create a visual direction for a new project.",placeholder:"A deep-purple space UI with chunky retro icons...",steps:["Define the mood and visual references","Choose a focused color palette","Set typography, shape, and motion rules","Suggest original assets to create"]},
-  qa:{name:"QA Scout",desc:"Review an idea for confusing flows and edge cases.",placeholder:"A project gallery with create and remix features...",steps:["List the main user journeys","Check validation and empty states","Review creator attribution and privacy risks","Build a concise test checklist"]}
-};
-let activeAgent=agentProfiles.cosmos;
-function openAgent(id){
-  activeAgent=agentProfiles[id]||agentProfiles.cosmos;
-  document.getElementById("agent-dialog-title").textContent=activeAgent.name;
-  document.getElementById("agent-dialog-description").textContent=activeAgent.desc;
-  const input=document.getElementById("agent-prompt");input.value="";input.placeholder=activeAgent.placeholder;
-  const chat=document.getElementById("agent-chat");chat.replaceChildren();
-  const welcome=document.createElement("div");welcome.className="chat-bubble assistant";
-  const strong=document.createElement("strong");strong.textContent=activeAgent.name+" · Local demo";
-  const p=document.createElement("p");p.textContent="Describe your idea. This playground will organize it into a starter plan; it does not call an AI model.";
-  welcome.append(strong,p);chat.appendChild(welcome);document.getElementById("agent-dialog").showModal();
+
+const CODING_SYSTEM_PROMPT = `You are PromptSim's senior AI coding agent. You build complete, original, runnable websites and browser games from user requests.
+Return ONLY one valid JSON object with exactly these keys: "html", "css", "js", "summary". Every value must be a JSON string. Do not wrap the JSON in Markdown fences and do not output any other prose.
+"html" must be a complete HTML5 document. It must link to ./styles.css in the head and ./script.js near the end of body. "css" must contain all custom styles. "js" must contain the real interactive behavior.
+Write real working code, not a static mockup or a checklist. Buttons, navigation, forms, menus, game controls, scoring, restart/reset, and responsive behavior must actually work when requested. Use semantic accessible HTML and responsive CSS. Avoid placeholder TODOs. If the request is a game, implement the game loop/input/collisions/scoring and restart behavior. Use original visuals and text. Do not clone any named existing project or copy supplied creator projects.
+Do not include any secret keys. Do not rely on server APIs unless the user specifically asks; prefer an all-client-side project suitable for static hosting. Keep external dependencies minimal and mention them in summary. Don't use document.write. Protect against HTML injection when rendering user-entered content.
+If revising a project, preserve its working features and apply the user's requested changes rather than replacing unrelated parts. The summary should briefly describe what was built or changed.`;
+const codeEditor=document.getElementById("code-editor");
+const previewFrame=document.getElementById("app-preview");
+const statusText=document.getElementById("generation-status-text");
+const statusBox=document.getElementById("generation-status");
+const buildButton=document.getElementById("generate-app");
+const fileLabels={html:"index.html",css:"styles.css",js:"script.js"};
+let previewTimer=null;
+function setBuildStatus(message,kind="info"){
+  statusText.textContent=message;
+  statusBox.classList.remove("success","error","working");
+  if(kind)statusBox.classList.add(kind);
 }
-document.querySelectorAll("[data-agent]").forEach(button=>button.addEventListener("click",()=>openAgent(button.dataset.agent)));
-document.getElementById("close-agent").addEventListener("click",()=>document.getElementById("agent-dialog").close());
-document.getElementById("agent-run").addEventListener("click",()=>{
-  const prompt=document.getElementById("agent-prompt").value.trim();if(!prompt){toast("Describe a project first.");return;}
-  const chat=document.getElementById("agent-chat");
-  const userBubble=document.createElement("div");userBubble.className="chat-bubble user";userBubble.textContent=prompt;chat.appendChild(userBubble);
-  const reply=document.createElement("div");reply.className="chat-bubble assistant";
-  const strong=document.createElement("strong");strong.textContent=activeAgent.name+" · Demo plan";
-  const body=document.createElement("p");body.textContent="IDEA\n"+prompt+"\n\nSTARTER CHECKLIST\n"+activeAgent.steps.map((step,i)=>(i+1)+". "+step).join("\n")+"\n\nFIRST STEP\nChoose one small milestone and build a working version before adding more features.\n\nOWNERSHIP\nKeep your original source files and creator credits attached. This local demo does not upload or publish your idea.";
-  reply.append(strong,body);chat.appendChild(reply);document.getElementById("agent-prompt").value="";chat.scrollTop=chat.scrollHeight;
+function currentFiles(){
+  return state.studioFiles.html.trim()||state.studioFiles.css.trim()||state.studioFiles.js.trim();
+}
+function saveStudioLocally(){
+  try{
+    localStorage.setItem("promptsim-studio-project",JSON.stringify({
+      files:state.studioFiles,activeFile:state.activeFile,updated:Date.now()
+    }));
+  }catch(error){console.warn("PromptSim could not save the local draft:",error);}
+}
+function loadStudioLocally(){
+  try{
+    const saved=JSON.parse(localStorage.getItem("promptsim-studio-project")||"null");
+    if(saved&&saved.files&&typeof saved.files.html==="string"){
+      state.studioFiles={html:saved.files.html||"",css:saved.files.css||"",js:saved.files.js||""};
+      state.activeFile=["html","css","js"].includes(saved.activeFile)?saved.activeFile:"html";
+      document.getElementById("preview-size").textContent="Restored local draft";
+      showActiveCode();
+      if(currentFiles())refreshAppPreview();
+    }
+  }catch(error){console.warn("PromptSim could not restore the local draft:",error);}
+}
+function showActiveCode(){
+  codeEditor.value=state.studioFiles[state.activeFile]||"";
+  document.querySelectorAll(".code-tab").forEach(button=>button.classList.toggle("active",button.dataset.file===state.activeFile));
+  document.getElementById("editor-status").textContent=state.studioFiles[state.activeFile]?"Editing "+fileLabels[state.activeFile]:"Generate a project to create source files.";
+}
+function injectPreviewFiles(){
+  let html=state.studioFiles.html||"<!doctype html><html><head><meta charset='utf-8'><title>PromptSim preview</title></head><body></body></html>";
+  // srcdoc cannot resolve the project's separate local files, so inline the CSS and JS into the preview only.
+  html=html.replace(/<link\b[^>]*href=["'][^"']*styles\.css[^"']*["'][^>]*>/ig,"");
+  html=html.replace(/<script\b[^>]*src=["'][^"']*script\.js[^"']*["'][^>]*>\s*<\/script\s*>/ig,"");
+  const cssText=(state.studioFiles.css||"").replace(/<\/style/ig,"<\\/style");
+  const jsText=(state.studioFiles.js||"").replace(/<\/script/ig,"<\\/script");
+  if(cssText){
+    const styleBlock="<style>\n"+cssText+"\n</style>";
+    if(/<\/head\s*>/i.test(html))html=html.replace(/<\/head\s*>/i,styleBlock+"\n</head>");
+    else html=styleBlock+html;
+  }
+  if(jsText){
+    const scriptBlock="<script>\n"+jsText+"\n<\/script>";
+    if(/<\/body\s*>/i.test(html))html=html.replace(/<\/body\s*>/i,scriptBlock+"\n</body>");
+    else html+=scriptBlock;
+  }
+  return html;
+}
+function refreshAppPreview(){
+  previewFrame.srcdoc=injectPreviewFiles();
+  document.getElementById("preview-size").textContent=currentFiles()?"Preview updated":"No build yet";
+  saveStudioLocally();
+}
+function parseGeneratedProject(response){
+  let raw=response?.message?.content??response?.text??response;
+  if(Array.isArray(raw))raw=raw.map(part=>typeof part==="string"?part:(part?.text||"")).join("\n");
+  if(typeof raw!=="string")throw new Error("The model returned an unexpected response format.");
+  raw=raw.trim().replace(/^\x60{3}(?:json)?\s*/i,"").replace(/\s*\x60{3}\s*$/,"");
+  const first=raw.indexOf("{"),last=raw.lastIndexOf("}");
+  if(first<0||last<=first)throw new Error("The model didn't return the expected source files. Try again with a more specific request.");
+  let parsed;
+  try{parsed=JSON.parse(raw.slice(first,last+1));}
+  catch(error){throw new Error("The model returned malformed file data. Try Build with AI again.");}
+  const files={html:parsed.html,css:parsed.css,js:parsed.js};
+  for(const name of Object.keys(files)){
+    if(typeof files[name]!=="string"||!files[name].trim())throw new Error("The model left "+fileLabels[name]+" empty. Try the request again.");
+  }
+  // Ensure the separate files work locally, even if a model forgets one of the tags.
+  if(!/<link\b[^>]*href=["'][^"']*styles\.css[^"']*["']/i.test(files.html)){
+    const cssLink='<link rel="stylesheet" href="./styles.css">';
+    files.html=/<\/head\s*>/i.test(files.html)?files.html.replace(/<\/head\s*>/i,cssLink+"\n</head>"):cssLink+files.html;
+  }
+  if(!/<script\b[^>]*src=["'][^"']*script\.js[^"']*["']/i.test(files.html)){
+    const jsLink='<script src="./script.js"><\/script>';
+    files.html=/<\/body\s*>/i.test(files.html)?files.html.replace(/<\/body\s*>/i,jsLink+"\n</body>"):files.html+jsLink;
+  }
+  return {files,summary:typeof parsed.summary==="string"?parsed.summary:"Your project was generated by the selected coding model."};
+}
+function buildUserMessage(request){
+  if(!currentFiles())return "Build a new project from this request.\n\nUSER REQUEST:\n"+request+"\n\nReturn complete working files, not a plan.";
+  return "Modify the current project according to the user's request below. Preserve unrelated working features. Return the full updated contents of all three files.\n\nUSER REQUEST:\n"+request+"\n\nCURRENT FILES (edit these, do not discard unrelated behavior):\n--- index.html ---\n"+state.studioFiles.html+"\n--- styles.css ---\n"+state.studioFiles.css+"\n--- script.js ---\n"+state.studioFiles.js;
+}
+async function generateApp(){
+  const prompt=document.getElementById("builder-prompt").value.trim();
+  if(!prompt){setBuildStatus("Describe the website or game you want to build first.","error");return;}
+  if(!window.puter||!puter.ai||typeof puter.ai.chat!=="function"){
+    setBuildStatus("The AI engine didn't load. Refresh the page or check whether js.puter.com is blocked.","error");return;
+  }
+  if(state.isGenerating)return;
+  state.isGenerating=true;buildButton.disabled=true;buildButton.classList.add("is-loading");
+  document.getElementById("builder-hint").textContent="The LLM is writing real HTML, CSS and JavaScript…";
+  setBuildStatus("Connecting to "+document.getElementById("ai-model").selectedOptions[0].textContent+" and generating files…","working");
+  try{
+    const result=await puter.ai.chat([
+      {role:"system",content:CODING_SYSTEM_PROMPT},
+      {role:"user",content:buildUserMessage(prompt)}
+    ],{model:document.getElementById("ai-model").value,normalize:true,max_tokens:16000});
+    const project=parseGeneratedProject(result);
+    state.studioFiles=project.files;
+    state.activeFile="html";
+    showActiveCode();refreshAppPreview();
+    document.getElementById("editor-status").textContent="Generated by the selected model. You can edit this code.";
+    document.getElementById("file-count").textContent="3 files";
+    document.getElementById("builder-hint").textContent=project.summary;
+    document.getElementById("preview-size").textContent="AI build ready";
+    setBuildStatus("Build complete. Test the preview, edit source, or ask for another change.","success");
+    state.remixSource=null;
+  }catch(error){
+    console.error("PromptSim AI build failed:",error);
+    const message=error?.message||String(error);
+    setBuildStatus("AI build failed: "+message+" — check model access/sign-in and try again.","error");
+    document.getElementById("builder-hint").textContent="The model did not change your current project.";
+  }finally{
+    state.isGenerating=false;buildButton.disabled=false;buildButton.classList.remove("is-loading");
+  }
+}
+buildButton.addEventListener("click",generateApp);
+document.getElementById("builder-prompt").addEventListener("keydown",event=>{
+  if((event.ctrlKey||event.metaKey)&&event.key==="Enter"){event.preventDefault();generateApp();}
 });
+document.querySelectorAll("[data-example]").forEach(button=>button.addEventListener("click",()=>{
+  document.getElementById("builder-prompt").value=button.dataset.example;
+  document.getElementById("builder-prompt").focus();
+}));
+document.getElementById("connect-ai").addEventListener("click",async()=>{
+  if(!window.puter?.auth?.signIn){setBuildStatus("Puter AI couldn't load. Refresh this page and try again.","error");return;}
+  const button=document.getElementById("connect-ai");
+  button.disabled=true;
+  try{
+    await puter.auth.signIn();
+    button.textContent="AI account connected ✓";
+    setBuildStatus("Account connected. Choose a coding model and build your project.","success");
+  }catch(error){
+    setBuildStatus("Sign-in was cancelled or failed: "+(error?.message||String(error)),"error");
+  }finally{button.disabled=false;}
+});
+document.querySelectorAll(".code-tab").forEach(button=>button.addEventListener("click",()=>{
+  state.studioFiles[state.activeFile]=codeEditor.value;
+  state.activeFile=button.dataset.file;showActiveCode();
+}));
+codeEditor.addEventListener("input",()=>{
+  state.studioFiles[state.activeFile]=codeEditor.value;
+  document.getElementById("editor-status").textContent="Unsaved edits to "+fileLabels[state.activeFile];
+  clearTimeout(previewTimer);
+  previewTimer=setTimeout(()=>refreshAppPreview(),700);
+});
+document.getElementById("apply-code").addEventListener("click",()=>{
+  state.studioFiles[state.activeFile]=codeEditor.value;
+  refreshAppPreview();
+  document.getElementById("editor-status").textContent="Applied to live preview.";
+  setBuildStatus("Manual code changes applied to the sandboxed preview.","success");
+});
+document.getElementById("refresh-preview").addEventListener("click",()=>{
+  state.studioFiles[state.activeFile]=codeEditor.value;refreshAppPreview();setBuildStatus("Preview refreshed.","success");
+});
+document.getElementById("download-app").addEventListener("click",async()=>{
+  state.studioFiles[state.activeFile]=codeEditor.value;
+  if(!currentFiles()){setBuildStatus("Build a project before downloading source files.","error");return;}
+  if(!window.JSZip){setBuildStatus("The ZIP tool didn't load. Refresh the page and try again.","error");return;}
+  const button=document.getElementById("download-app");button.disabled=true;
+  try{
+    const zip=new JSZip();
+    zip.file("index.html",state.studioFiles.html);
+    zip.file("styles.css",state.studioFiles.css);
+    zip.file("script.js",state.studioFiles.js);
+    zip.file("README.md","# PromptSim generated project\n\nOpen index.html in a browser or serve this folder with a local static web server.\n\nThis source was generated with an AI coding model. Review code and external dependencies before publishing.\n");
+    const blob=await zip.generateAsync({type:"blob"});
+    const url=URL.createObjectURL(blob);const link=document.createElement("a");
+    link.href=url;link.download="promptsim-project.zip";document.body.appendChild(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);setBuildStatus("Project ZIP downloaded with all three source files.","success");
+  }catch(error){setBuildStatus("Download failed: "+(error?.message||String(error)),"error");}
+  finally{button.disabled=false;}
+});
+document.getElementById("publish-app").addEventListener("click",async()=>{
+  if(!currentFiles()){setBuildStatus("Build a website before publishing.","error");return;}
+  if(!window.puter?.fs||!window.puter?.hosting){setBuildStatus("Puter hosting tools didn't load. Refresh and try again.","error");return;}
+  const button=document.getElementById("publish-app");const result=document.getElementById("publish-result");
+  button.disabled=true;result.textContent="Uploading your source files to your own hosting…";
+  try{
+    if(puter.auth?.isSignedIn&&!await puter.auth.isSignedIn())await puter.auth.signIn();
+    state.studioFiles[state.activeFile]=codeEditor.value;
+    const folder="promptsim-"+puter.randName().toLowerCase().replace(/[^a-z0-9-]/g,"-");
+    const subdomain=folder.slice(0,42);
+    await puter.fs.mkdir(folder);
+    await puter.fs.write(folder+"/index.html",state.studioFiles.html);
+    await puter.fs.write(folder+"/styles.css",state.studioFiles.css);
+    await puter.fs.write(folder+"/script.js",state.studioFiles.js);
+    const site=await puter.hosting.create(subdomain,folder);
+    const url=site.url||("https://"+site.subdomain+".puter.site");
+    result.replaceChildren();
+    const link=document.createElement("a");link.href=url;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Open published website ↗";
+    result.appendChild(link);
+    setBuildStatus("Website published. Use the link beside the publish button to open it.","success");
+  }catch(error){
+    console.error("PromptSim publish failed:",error);
+    result.textContent="Publish failed. Check Puter sign-in, site-name availability, and hosting access.";
+    setBuildStatus("Could not publish: "+(error?.message||String(error)),"error");
+  }finally{button.disabled=false;}
+});
+loadStudioLocally();
 
 render();
