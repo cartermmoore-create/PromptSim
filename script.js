@@ -1,18 +1,12 @@
 const starterProjects = [
-  {title:"Dreamscape Explorer",author:"@pixelpilot",avatar:"◈",symbol:"✦",category:"Hot",tags:["Featured"],views:"142k",likes:"239",art:"dream",prompt:"A dreamy surreal landscape with floating islands, soft clouds, and a glowing portal."},
-  {title:"Change the World",author:"@funniestguyever",avatar:"◉",symbol:"✹",category:"Hot",tags:["Featured"],views:"2.7k",likes:"49",art:"world",prompt:"A cinematic fiery globe made of molten gold and tiny glowing continents."},
-  {title:"Oddly Adorable",author:"@tinyplanet",avatar:"✿",symbol:"☺",category:"Featured",tags:["For You"],views:"16k",likes:"190",art:"face",prompt:"A whimsical cartoon creature with huge sparkling eyes in a pastel fantasy world."},
-  {title:"Blocklands",author:"@SirDingus",avatar:"▦",symbol:"▰",category:"Hot",tags:["Multiplayer"],views:"8.3k",likes:"212",art:"blocks",prompt:"A blocky voxel desert sandbox with bright blue sky, block clouds, and cactus."},
-  {title:"Tiny Creator Studio",author:"@Trey6383",avatar:"✷",symbol:"▣",category:"New",tags:["For You"],views:"8.4k",likes:"205",art:"studio",prompt:"A dark creator dashboard full of playful controls, previews, and tiny widgets."},
-  {title:"Logo Maker Ultimate",author:"@Breenie_the_pirate",avatar:"⬡",symbol:"✎",category:"Featured",tags:["New"],views:"2.2k",likes:"73",art:"logo",prompt:"A colorful playful logo-maker canvas with bold hand-drawn lettering and sticker-like shapes."},
-  {title:"Larpzon Improved",author:"@Breenie_the_pirate",avatar:"⬡",symbol:"L",category:"Hot",tags:["For You"],views:"7.9k",likes:"213",art:"larp",prompt:"A funny oversized wordmark on top of a deliberately blurry retro web collage."},
-  {title:"Squad Game Multiplayer",author:"@kotsoft",avatar:"◉",symbol:"♟",category:"Multiplayer",tags:["Hot"],views:"11k",likes:"190",art:"squad",prompt:"A low-poly multiplayer party game with tiny characters in green uniforms in a sandy arena."},
-  {title:"Web Wave",author:"@waveform",avatar:"⌁",symbol:"➤",category:"Hot",tags:["Featured"],views:"7.1k",likes:"192",art:"wave",prompt:"A retro neon arcade game with a yellow waveform gliding through a dark grid."},
-  {title:"Untitled Ragdoll Game",author:"@ragdollworks",avatar:"◍",symbol:"◌",category:"New",tags:["Multiplayer"],views:"17k",likes:"183",art:"ragdoll",prompt:"A stylized third-person physics sandbox with ragdoll characters and dramatic lighting."},
-  {title:"IHTX Maker: Old Build",author:"@notasobot",avatar:"✹",symbol:"☻",category:"New",tags:["For You"],views:"17k",likes:"151",art:"old",prompt:"A chaotic retro image maker with a funny purple mascot and bold red interface."},
-  {title:"BFDI Scene Generator",author:"@scene-maker",avatar:"◉",symbol:"●",category:"Featured",tags:["New"],views:"13k",likes:"122",art:"bfdi",prompt:"A bright cartoon scene generator with playful blue sky, puffy clouds, and quirky characters."}
+  {title:"Dreamscape Explorer",author:"@pixelpilot",avatar:"◈",symbol:"✦",category:"Hot",tags:["Featured"],views:"142k",likes:"239",art:"dream",prompt:"A surreal dreamscape exploration project with soft clouds and a mysterious central symbol."},
+  {title:"Change the World",author:"@funniestguyever",avatar:"◉",symbol:"✹",category:"Hot",tags:["Featured"],views:"2.7k",likes:"49",art:"world",prompt:"A fiery, stylized world-changing experience built around a glowing molten landscape."},
+  {title:"Blocklands",author:"@SirDingus",avatar:"▦",symbol:"▰",category:"Hot",tags:["Multiplayer"],views:"8.3k",likes:"212",art:"blocks",prompt:"A blocky low-poly desert sandbox with tiny trees, open terrain, and a bright sky."},
+  {title:"Larpzon Improved",author:"@Breenie_the_pirate",avatar:"⬡",symbol:"L",category:"Hot",tags:["Featured"],views:"7.9k",likes:"213",art:"larp",prompt:"A playful retro web experience with bold lettering and deliberately quirky presentation."},
+  {title:"Squad Game Multiplayer",author:"@kotsoft",avatar:"◉",symbol:"♟",category:"Multiplayer",tags:["Hot"],views:"11k",likes:"190",art:"squad",prompt:"A stylized multiplayer arena with small characters in a sandy environment."},
+  {title:"Web Wave",author:"@waveform",avatar:"⌁",symbol:"➤",category:"Hot",tags:["Featured"],views:"7.1k",likes:"192",art:"wave",prompt:"A retro arcade experience with a neon waveform travelling over a dark grid."}
 ];
-const state = {filter:"Hot",view:"Home",query:"",sort:"Top · Month",custom:[]};
+const state = {filter:"Hot",view:"Home",query:"",sort:"Top · Month",custom:[],remixSource:null};
 const gallery = document.getElementById("gallery");
 const search = document.getElementById("search");
 const dialog = document.getElementById("create-dialog");
@@ -34,19 +28,85 @@ function svgData(key){return "data:image/svg+xml;charset=UTF-8,"+encodeURICompon
 function makeCustomArt(text){const t=String(text||"Your project").replace(/[<>&"]/g,"").slice(0,45);return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400"><defs><linearGradient id="b" x2="1" y2="1"><stop stop-color="#30235c"/><stop offset="1" stop-color="#257da3"/></linearGradient><radialGradient id="g"><stop stop-color="#ffdd70"/><stop offset="1" stop-color="#ff6e9f"/></radialGradient></defs><rect width="640" height="400" fill="url(#b)"/><circle cx="520" cy="85" r="100" fill="url(#g)" opacity=".9"/><circle cx="110" cy="326" r="150" fill="#5ed4ca" opacity=".6"/><path d="M0 320 190 210 330 280 500 165 640 250V400H0Z" fill="#14192e" opacity=".7"/><text x="320" y="189" text-anchor="middle" font-family="Arial,sans-serif" font-size="35" font-weight="800" fill="#fff">${t.replace(/&/g,"&amp;")}</text><text x="320" y="232" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#e1e7ff">MADE WITH PROMPTSIM</text></svg>`;}
 function getProjects(){return [...state.custom,...starterProjects];}
 function matches(p){const q=state.query.toLowerCase();const queryMatch=!q||[p.title,p.author,p.prompt,p.category,...(p.tags||[])].join(" ").toLowerCase().includes(q);if(!queryMatch)return false;if(state.filter==="For You")return (p.tags||[]).includes("For You")||p.category==="For You"||p.custom;if(state.filter==="Hot")return p.category==="Hot"||p.tags.includes("Hot")||p.custom;if(state.filter==="Multiplayer")return p.tags.includes("Multiplayer")||p.category==="Multiplayer";if(state.filter==="Featured")return p.tags.includes("Featured")||p.category==="Featured";if(state.filter==="New")return p.category==="New"||p.custom;return true;}
-function card(p,i){const card=document.createElement("article");card.className="project";card.innerHTML=`<div class="thumb-wrap"><img class="thumb" alt="" loading="lazy"><div class="thumb-overlay"></div><button class="play-btn" aria-label="Preview ${escapeHtml(p.title)}" title="Preview project">▶</button><div class="metric"><span>▶ ${escapeHtml(p.views||"0")}</span><span class="heart">♥ ${escapeHtml(p.likes||"0")}</span></div>${i===0&&!p.custom?'<div class="project-badges"><span class="tiny-badge">Featured</span></div>':""}</div><div class="project-info"><div class="avatar">${escapeHtml(p.avatar||"✦")}</div><div class="project-text"><div class="project-title" title="${escapeHtml(p.title)}">${escapeHtml(p.title)}</div><div class="project-author">${escapeHtml(p.author||"@you")}</div></div></div>`;card.querySelector("img").src=p.image||svgData(p.art);card.querySelector(".play-btn").addEventListener("click",()=>showPreview(p));card.querySelector(".thumb-wrap").addEventListener("dblclick",()=>showPreview(p));return card;}
-function render(){gallery.replaceChildren();const list=getProjects().filter(matches);if(state.sort==="Most liked")list.sort((a,b)=>parseInt(b.likes||0)-parseInt(a.likes||0));if(state.sort==="Newest")list.sort((a,b)=>(b.created||0)-(a.created||0));list.forEach((p,i)=>gallery.appendChild(card(p,i)));document.getElementById("empty-state").hidden=list.length>0;gallery.hidden=list.length===0;document.querySelectorAll(".filter[data-filter]").forEach(b=>b.classList.toggle("active",b.dataset.filter===state.filter));document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.view===state.view));}
+function card(p,i){const card=document.createElement("article");card.className="project";card.innerHTML=`<div class="thumb-wrap"><img class="thumb" alt="" loading="lazy"><div class="thumb-overlay"></div><button class="play-btn" aria-label="Preview ${escapeHtml(p.title)}" title="Preview project">▶</button><div class="metric"><span>▶ ${escapeHtml(p.views||"0")}</span><span class="heart">♥ ${escapeHtml(p.likes||"0")}</span></div>${i===0&&!p.custom?'<div class="project-badges"><span class="tiny-badge">Featured</span></div>':""}</div><div class="project-info"><div class="avatar">${escapeHtml(p.avatar||"✦")}</div><div class="project-text"><div class="project-title" title="${escapeHtml(p.title)}">${escapeHtml(p.title)}</div><div class="project-author">${escapeHtml(p.author||"@you")}</div>${p.inspiredBy?`<div class="project-credit">Inspired by ${escapeHtml(p.inspiredBy.title)} · ${escapeHtml(p.inspiredBy.author)}</div>`:""}</div></div>`;card.querySelector("img").src=p.image||svgData(p.art);card.querySelector(".play-btn").addEventListener("click",()=>showPreview(p));card.querySelector(".thumb-wrap").addEventListener("dblclick",()=>showPreview(p));return card;}
+function render(){
+  const isAgents=state.view==="Agents";
+  const query=state.query.toLowerCase();
+  const agentsView=document.getElementById("agents-view");
+  agentsView.hidden=!isAgents;
+  document.querySelector(".filters").hidden=isAgents;
+  document.getElementById("gallery-intro").hidden=isAgents;
+  document.querySelector(".ownership-note").hidden=isAgents;
+  const list=getProjects().filter(matches);
+  if(state.sort==="Most liked")list.sort((a,b)=>parseInt(b.likes||0)-parseInt(a.likes||0));
+  if(state.sort==="Newest")list.sort((a,b)=>(b.created||0)-(a.created||0));
+  gallery.replaceChildren();
+  if(!isAgents)list.forEach((p,i)=>gallery.appendChild(card(p,i)));
+  gallery.hidden=isAgents||list.length===0;
+  document.getElementById("empty-state").hidden=isAgents||list.length>0;
+  document.getElementById("project-heading").textContent=state.view==="Feed"?"Fresh from the community":"Projects orbiting PromptSim";
+  document.getElementById("project-subheading").textContent=state.view==="Feed"?"Recent ideas, with their makers credited.":"Explore ideas from their creators — with credit kept in view.";
+  document.querySelectorAll(".agent-card").forEach(card=>{card.hidden=!!query&&!(card.dataset.search+" "+card.textContent).toLowerCase().includes(query);});
+  document.querySelectorAll(".filter[data-filter]").forEach(b=>b.classList.toggle("active",b.dataset.filter===state.filter));
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.view===state.view));
+}
 function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function toast(message){const old=document.querySelector(".toast");if(old)old.remove();const el=document.createElement("div");el.className="toast";el.textContent=message;document.body.appendChild(el);setTimeout(()=>el.remove(),2600);}
-function showPreview(p){const d=document.createElement("dialog");d.className="create-dialog preview-dialog";d.innerHTML=`<form method="dialog"><div class="dialog-head"><div><span class="eyebrow">PROJECT PREVIEW</span><h2>${escapeHtml(p.title)}</h2></div><button class="icon-btn" value="close" aria-label="Close">✕</button></div><img src="${p.image||svgData(p.art)}" alt="" style="width:100%;aspect-ratio:1.6;object-fit:cover;border-radius:10px;border:1px solid #444"><p style="color:#b8bec9;line-height:1.6">${escapeHtml(p.prompt||"A project created with PromptSim.")}</p><button class="create-btn" type="button" id="remix">✦ Remix this idea</button></form>`;document.body.appendChild(d);d.showModal();d.addEventListener("close",()=>d.remove());d.querySelector("#remix").addEventListener("click",()=>{d.close();dialog.showModal();document.getElementById("project-name").value="Remix: "+p.title;document.getElementById("project-prompt").value=p.prompt||p.title;});}
+function showPreview(p){
+  const d=document.createElement("dialog");
+  d.className="create-dialog preview-dialog";
+  d.innerHTML=`<form method="dialog"><div class="dialog-head"><div><span class="eyebrow">PROJECT PREVIEW</span><h2>${escapeHtml(p.title)}</h2></div><button class="icon-btn" value="close" aria-label="Close">✕</button></div><img src="${p.image||svgData(p.art)}" alt="" style="width:100%;aspect-ratio:1.6;object-fit:cover;border-radius:10px;border:1px solid #444"><p style="color:#b8bec9;line-height:1.6">${escapeHtml(p.prompt||"A project created with PromptSim.")}</p>${p.inspiredBy?`<p class="attribution-note">Inspired by ${escapeHtml(p.inspiredBy.title)} by ${escapeHtml(p.inspiredBy.author)}. This is a separate project.</p>`:""}<p class="attribution-note">Creator credit stays attached. A remix begins with a fresh prompt instead of copying the source prompt or changing the original.</p><button class="create-btn" type="button" id="remix">✦ Create credited remix</button></form>`;
+  document.body.appendChild(d);
+  d.showModal();
+  d.addEventListener("close",()=>d.remove());
+  d.querySelector("#remix").addEventListener("click",()=>{
+    d.close();
+    state.remixSource={title:p.title,author:p.author||"Unknown creator"};
+    dialog.showModal();
+    document.getElementById("project-name").value="Remix: "+p.title;
+    document.getElementById("project-prompt").value=`Create an original project with different visuals and mechanics, inspired by the broad idea of "${p.title}". Do not copy the source project. My own twist: `;
+    document.getElementById("create-note").textContent=`This new project is saved locally and will display inspiration credit for ${p.title} by ${p.author||"Unknown creator"}.`;
+  });
+}
 search.addEventListener("input",()=>{state.query=search.value;render();});
 document.querySelectorAll(".filter[data-filter]").forEach(b=>b.addEventListener("click",()=>{state.filter=b.dataset.filter;render();}));
-document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{state.view=b.dataset.view;if(state.view==="Feed"){state.filter="New";}else{state.filter="Hot";}render();}));
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{state.view=b.dataset.view;if(state.view==="Feed"){state.filter="New";}else if(state.view==="Home"){state.filter="Hot";}render();}));
 document.getElementById("reset-search").addEventListener("click",()=>{search.value="";state.query="";state.filter="Hot";render();});
 document.getElementById("sort-menu").addEventListener("click",()=>{const options=["Top · Month","Most liked","Newest"];const idx=options.indexOf(state.sort);state.sort=options[(idx+1)%options.length];document.querySelector("#sort-menu span:nth-child(2)").textContent=state.sort;render();});
-function openCreate(){dialog.showModal();}
+function openCreate(){state.remixSource=null;document.getElementById("create-note").textContent="Your title and prompt are saved only in this browser. No project is uploaded or shared.";dialog.showModal();}
 document.getElementById("open-create").addEventListener("click",openCreate);document.getElementById("rail-create").addEventListener("click",openCreate);
 document.getElementById("create-form").addEventListener("submit",e=>e.preventDefault());
-document.getElementById("make-project").addEventListener("click",e=>{const name=document.getElementById("project-name").value.trim();const prompt=document.getElementById("project-prompt").value.trim();if(!name||!prompt){e.preventDefault();toast("Add a project name and describe your idea first.");return;}const p={title:name,author:"@you",avatar:"✦",category:"New",tags:["For You"],views:"1",likes:"0",art:"custom",prompt,custom:true,created:Date.now()};state.custom.unshift(p);try{const saved=JSON.parse(localStorage.getItem("promptsim-projects")||"[]");saved.unshift({title:name,prompt,created:p.created});localStorage.setItem("promptsim-projects",JSON.stringify(saved.slice(0,30)));}catch{}state.filter="New";search.value="";state.query="";dialog.close();document.getElementById("project-name").value="";document.getElementById("project-prompt").value="";render();toast("Project added to your gallery.");window.scrollTo({top:0,behavior:"smooth"});});
-try{const saved=JSON.parse(localStorage.getItem("promptsim-projects")||"[]");state.custom=saved.map(p=>({title:p.title,author:"@you",avatar:"✦",category:"New",tags:["For You"],views:"1",likes:"0",art:"custom",prompt:p.prompt,custom:true,created:p.created}));}catch{}
+document.getElementById("make-project").addEventListener("click",e=>{const name=document.getElementById("project-name").value.trim();const prompt=document.getElementById("project-prompt").value.trim();if(!name||!prompt){e.preventDefault();toast("Add a project name and describe your idea first.");return;}const source=state.remixSource;const p={title:name,author:"@you",avatar:"✦",category:"New",tags:["For You"],views:"1",likes:"0",art:"custom",prompt,custom:true,inspiredBy:source?{title:source.title,author:source.author}:null,created:Date.now()};state.remixSource=null;state.custom.unshift(p);try{const saved=JSON.parse(localStorage.getItem("promptsim-projects")||"[]");saved.unshift({title:name,prompt,created:p.created,inspiredBy:p.inspiredBy});localStorage.setItem("promptsim-projects",JSON.stringify(saved.slice(0,30)));}catch{}state.filter="New";search.value="";state.query="";dialog.close();document.getElementById("project-name").value="";document.getElementById("project-prompt").value="";render();toast("Project added to your gallery.");window.scrollTo({top:0,behavior:"smooth"});});
+try{const saved=JSON.parse(localStorage.getItem("promptsim-projects")||"[]");state.custom=saved.map(p=>({title:p.title,author:"@you",avatar:"✦",category:"New",tags:["For You"],views:"1",likes:"0",art:"custom",prompt:p.prompt,custom:true,inspiredBy:p.inspiredBy||null,created:p.created}));}catch{}
+
+const agentProfiles = {
+  cosmos:{name:"Cosmos Builder",desc:"Map a setting, its rules, locations, characters, and secrets.",placeholder:"A strange galaxy with five explorable planets...",steps:["Define the core concept and player goal","Map the world rules and key locations","Outline three original encounters","Choose a small first-build milestone"]},
+  code:{name:"Code Pilot",desc:"Turn a feature into a practical build plan.",placeholder:"A browser exploration game with a minimap...",steps:["Break the feature into small systems","Propose a clean file/component structure","List implementation milestones","Add a test and debugging checklist"]},
+  art:{name:"Art Director",desc:"Create a visual direction for a new project.",placeholder:"A deep-purple space UI with chunky retro icons...",steps:["Define the mood and visual references","Choose a focused color palette","Set typography, shape, and motion rules","Suggest original assets to create"]},
+  qa:{name:"QA Scout",desc:"Review an idea for confusing flows and edge cases.",placeholder:"A project gallery with create and remix features...",steps:["List the main user journeys","Check validation and empty states","Review creator attribution and privacy risks","Build a concise test checklist"]}
+};
+let activeAgent=agentProfiles.cosmos;
+function openAgent(id){
+  activeAgent=agentProfiles[id]||agentProfiles.cosmos;
+  document.getElementById("agent-dialog-title").textContent=activeAgent.name;
+  document.getElementById("agent-dialog-description").textContent=activeAgent.desc;
+  const input=document.getElementById("agent-prompt");input.value="";input.placeholder=activeAgent.placeholder;
+  const chat=document.getElementById("agent-chat");chat.replaceChildren();
+  const welcome=document.createElement("div");welcome.className="chat-bubble assistant";
+  const strong=document.createElement("strong");strong.textContent=activeAgent.name+" · Local demo";
+  const p=document.createElement("p");p.textContent="Describe your idea. This playground will organize it into a starter plan; it does not call an AI model.";
+  welcome.append(strong,p);chat.appendChild(welcome);document.getElementById("agent-dialog").showModal();
+}
+document.querySelectorAll("[data-agent]").forEach(button=>button.addEventListener("click",()=>openAgent(button.dataset.agent)));
+document.getElementById("agent-form").addEventListener("submit",e=>e.preventDefault());
+document.getElementById("agent-run").addEventListener("click",()=>{
+  const prompt=document.getElementById("agent-prompt").value.trim();if(!prompt){toast("Describe a project first.");return;}
+  const chat=document.getElementById("agent-chat");
+  const userBubble=document.createElement("div");userBubble.className="chat-bubble user";userBubble.textContent=prompt;chat.appendChild(userBubble);
+  const reply=document.createElement("div");reply.className="chat-bubble assistant";
+  const strong=document.createElement("strong");strong.textContent=activeAgent.name+" · Demo plan";
+  const body=document.createElement("p");body.textContent="IDEA\n"+prompt+"\n\nSTARTER CHECKLIST\n"+activeAgent.steps.map((step,i)=>(i+1)+". "+step).join("\n")+"\n\nFIRST STEP\nChoose one small milestone and build a working version before adding more features.\n\nOWNERSHIP\nKeep your original source files and creator credits attached. This local demo does not upload or publish your idea.";
+  reply.append(strong,body);chat.appendChild(reply);document.getElementById("agent-prompt").value="";chat.scrollTop=chat.scrollHeight;
+});
+
 render();
