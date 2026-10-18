@@ -49,7 +49,7 @@
             <div class="workspace-preview-stage" id="workspace-preview-stage">
               <iframe id="app-preview" title="AI-generated website or game preview" sandbox="allow-scripts allow-forms" referrerpolicy="no-referrer" srcdoc="<!doctype html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'></head><body style='margin:0;background:#fff;color:#72727c;font:16px system-ui;display:grid;place-items:center;min-height:100vh;text-align:center'><div style='max-width:360px;padding:24px'><div style='font-size:28px;margin-bottom:16px'>✧</div><div style='font-size:16px'>Nothing here yet — ask the agent to build something.</div></div></body></html>"></iframe>
               <div class="workspace-code-drawer" id="workspace-code-drawer" hidden>
-                <section class="editor-window">
+                <section class="editor-window" id="editor-window">
                   <header class="studio-panel-header"><div><strong>Source files</strong><span class="file-count" id="file-count">3 files</span></div><button class="panel-icon-btn" id="download-app" type="button" title="Download all source files as ZIP">↓ ZIP</button></header>
                   <nav class="code-tabs" aria-label="Source files"><button class="code-tab active" data-file="html" type="button"><span>◈</span> index.html</button><button class="code-tab" data-file="css" type="button"><span>◈</span> styles.css</button><button class="code-tab" data-file="js" type="button"><span>◈</span> script.js</button></nav>
                   <textarea id="code-editor" class="code-editor" aria-label="Editable project source code" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" placeholder="Generated source appears here. Edit directly, then apply changes."></textarea>
@@ -68,7 +68,7 @@
               <nav class="workspace-mode-tabs" aria-label="Workspace tools"><button class="workspace-mode active" type="button" data-workspace-mode="Build">✧ Build</button><button class="workspace-mode" id="workspace-history" type="button">◴ History</button></nav>
               <button class="workspace-post" id="publish-app" type="button" title="Publish this website using your Puter account">Post ↗</button>
             </header>
-            <div class="workspace-agent-context"><span class="agent-context-icon">✦</span><div><strong>PromptSim Agent</strong><span>Code · Preview · Iterate</span></div><button id="connect-ai" class="workspace-signin" type="button">Sign in</button></div>
+            <div class="workspace-agent-context"><span class="agent-context-icon">✦</span><div><strong>PromptSim Agent</strong><span>Code · Preview · Iterate</span></div><button id="connect-ai" class="workspace-signin" type="button">Sign in</button></div><span id="publish-result" class="workspace-publish-result" aria-live="polite"></span>
             <div class="workspace-chat" id="workspace-chat" aria-live="polite">
               <div class="workspace-chat-empty" id="workspace-chat-empty"><div class="workspace-chat-spark">✦</div><h2>What should we change?</h2><p>Describe what you want to build. The coding agent creates the files and runs them in the preview. Follow-up prompts can edit the existing code.</p></div>
             </div>
@@ -78,7 +78,7 @@
               <div class="workspace-attachment-row"><input id="attach-files" type="file" accept=".html,.css,.js,.json,.txt,.md" multiple hidden><button id="attach-files-trigger" class="workspace-attach-btn" type="button">＋ Attach files</button><span id="attachment-label">Optional source context</span></div>
               <div class="workspace-composer-bottom"><label class="model-picker workspace-model-picker"><span>MODEL</span><select id="ai-model" aria-label="Choose an AI coding model"><option value="">Loading available models…</option></select></label><button class="create-btn generate-btn" id="generate-app" type="button"><span>↑</span> Build</button></div>
               <div class="generation-status" id="generation-status" role="status" aria-live="polite"><span class="status-dot"></span><span id="generation-status-text">Ready. Describe what you want to build.</span></div>
-              <div class="workspace-disclaimer">The selected LLM writes code. Review generated files before publishing.</div>
+              <div class="workspace-disclaimer" id="builder-hint">The selected LLM writes code. Review generated files before publishing.</div>
             </div>
           </aside>
           <nav class="workspace-tool-rail" aria-label="Project tools">
