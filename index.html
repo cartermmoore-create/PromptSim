@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#171717">
+  <meta name="theme-color" content="#090712">
   <meta name="description" content="PromptSim — discover, remix, and create things from prompts.">
   <title>PromptSim — make something</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="#" aria-label="PromptSim home"><span class="brand-orb">✳</span><span>prompt<span class="brand-accent">sim</span></span></a>
+    <a class="brand" href="#" aria-label="PromptSim home"><img class="brand-logo" src="assets/promptsim-orb.webp" alt=""><span class="brand-word">prompt<span class="brand-accent">sim</span></span></a>
     <label class="searchbox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Search projects..." autocomplete="off"></label>
     <div class="top-actions"><a class="top-link socials" href="#community" title="Community">◎</a><a class="top-link socials" href="#community" title="Updates">♥</a><a class="top-link" href="#about">About</a><button class="create-btn" id="open-create"><span>＋</span> Create</button></div>
   </header>
   <aside class="rail" aria-label="Quick navigation">
-    <a class="rail-logo" href="#" title="Home"><span class="brand-orb">✳</span></a>
+    <a class="rail-logo" href="#" title="Home"><img class="rail-logo-img" src="assets/promptsim-orb.webp" alt=""></a>
     <a href="#activity" aria-label="Activity" title="Activity">♧</a>
     <a href="#liked" aria-label="Liked projects" title="Liked projects">♡</a>
     <a href="#collections" aria-label="Collections" title="Collections">▱</a>
@@ -23,7 +23,7 @@
     <span class="rail-spacer"></span><a href="#community" aria-label="Community" title="Community">◇</a><a href="#about" aria-label="About PromptSim" title="About PromptSim">☷</a><a href="#profile" aria-label="Profile" title="Profile">◉</a>
   </aside>
   <main class="page">
-    <nav class="primary-tabs" aria-label="Primary"><button class="tab active" data-view="Home"><span>⌂</span> Home</button><button class="tab" data-view="Feed"><span>▤</span> Feed</button></nav>
+    <nav class="primary-tabs" aria-label="Primary"><button class="tab active" data-view="Home"><span>⌂</span> Home</button><button class="tab" data-view="Feed"><span>▤</span> Feed</button><button class="tab" data-view="Agents"><span>✦</span> AI Agents</button></nav>
     <div class="filters" aria-label="Project filters">
       <button class="filter active" data-filter="Hot">⌁ <span>Hot</span></button>
       <button class="filter" data-filter="Multiplayer">◉ <span>Multiplayer</span></button>
@@ -32,6 +32,26 @@
       <button class="filter" data-filter="For You">♡ <span>For You</span></button>
       <button class="filter sort-filter" id="sort-menu">♜ <span>Top · Month</span><span class="chevron">⌄</span></button>
     </div>
+    <section class="agents-view" id="agents-view" hidden aria-labelledby="agents-heading">
+      <div class="gallery-intro agent-intro"><div><span class="eyebrow">YOUR CREATIVE CREW</span><h2 id="agents-heading">Meet your AI agents</h2><p>Specialized helpers for planning your next idea. This is a local UI demo, not a connected AI service.</p></div><span class="demo-pill"><span></span> DEMO MODE</span></div>
+      <div class="agent-grid">
+        <article class="agent-card" data-agent-card data-search="cosmos builder worldbuilding levels game narrative">
+          <div class="agent-card-top"><span class="agent-icon cosmos">✦</span><span class="agent-tag">WORLD DESIGN</span></div><h3>Cosmos Builder</h3><p>Shape a setting, its rules, locations, characters, and the secrets that tie it together.</p><button class="agent-open" data-agent="cosmos" type="button">Open agent <span>↗</span></button>
+        </article>
+        <article class="agent-card" data-agent-card data-search="code pilot code game website mechanics prototype">
+          <div class="agent-card-top"><span class="agent-icon code">&lt;/&gt;</span><span class="agent-tag">BUILD PLANNING</span></div><h3>Code Pilot</h3><p>Turn a feature idea into a practical implementation plan, file structure, and test checklist.</p><button class="agent-open" data-agent="code" type="button">Open agent <span>↗</span></button>
+        </article>
+        <article class="agent-card" data-agent-card data-search="art director visual style graphics colors logo assets">
+          <div class="agent-card-top"><span class="agent-icon art">✧</span><span class="agent-tag">VISUAL STYLE</span></div><h3>Art Director</h3><p>Explore color palettes, mood, UI language, and original art direction for your project.</p><button class="agent-open" data-agent="art" type="button">Open agent <span>↗</span></button>
+        </article>
+        <article class="agent-card" data-agent-card data-search="qa scout quality assurance test bugs flow accessibility">
+          <div class="agent-card-top"><span class="agent-icon qa">⌕</span><span class="agent-tag">QUALITY CHECK</span></div><h3>QA Scout</h3><p>Check the idea for edge cases, confusing interactions, accessibility, and possible bugs.</p><button class="agent-open" data-agent="qa" type="button">Open agent <span>↗</span></button>
+        </article>
+      </div>
+      <p class="agent-privacy"><span>✦</span> Agent prompts are handled locally in this demo. Nothing is sent to an AI provider.</p>
+    </section>
+    <div class="gallery-intro" id="gallery-intro"><div><span class="eyebrow">THE COMMUNITY UNIVERSE</span><h2 id="project-heading">Projects orbiting PromptSim</h2><p id="project-subheading">Explore ideas from their creators — with credit kept in view.</p></div><span class="project-count">CREATOR CREDIT INCLUDED</span></div>
+    <aside class="ownership-note" aria-label="Creator ownership and attribution"><span class="ownership-star">✦</span><div><strong>Originals stay original.</strong><p>Creator names stay attached to projects. A remix starts a separate local project with visible inspiration credit; it never edits or replaces the source.</p></div></aside>
     <section class="gallery" id="gallery" aria-label="Discover projects"></section>
     <div class="empty-state" id="empty-state" hidden><div class="empty-icon">⌕</div><h2>No projects found</h2><p>Try another search or choose a different filter.</p><button class="filter" id="reset-search">Clear search</button></div>
     <footer class="footer" id="about"><span>PromptSim</span><span>Dream it. Prompt it. Make it.</span><a href="https://github.com/cartermmoore-create/PromptSim">GitHub ↗</a></footer>
@@ -41,8 +61,17 @@
       <div class="dialog-head"><div><span class="eyebrow">PROMPTSIM STUDIO</span><h2>What are we making?</h2></div><button class="icon-btn" value="cancel" aria-label="Close">✕</button></div>
       <label class="field-label" for="project-name">Project name</label><input id="project-name" class="field" maxlength="60" placeholder="A tiny world, a game, a tool..." required>
       <label class="field-label" for="project-prompt">Describe your idea</label><textarea id="project-prompt" class="field prompt-field" rows="4" placeholder="A dreamy low-poly island with glowing mushrooms..." required></textarea>
-      <div class="dialog-note">This starter gallery saves your project locally in this browser.</div>
+      <div class="dialog-note" id="create-note">Your title and prompt are saved only in this browser. No project is uploaded or shared.</div>
       <button class="create-btn dialog-submit" id="make-project" value="default">＋ Create project</button>
+    </form>
+  </dialog>
+  <dialog id="agent-dialog" class="create-dialog agent-dialog">
+    <form method="dialog" id="agent-form">
+      <div class="dialog-head"><div><span class="eyebrow">AGENT PLAYGROUND · LOCAL DEMO</span><h2 id="agent-dialog-title">Cosmos Builder</h2><p id="agent-dialog-description" class="agent-dialog-description">Let's map your idea.</p></div><button class="icon-btn" value="cancel" aria-label="Close">✕</button></div>
+      <div class="agent-chat" id="agent-chat" aria-live="polite"><div class="chat-bubble assistant"><strong>Ready when you are.</strong><p>Describe a project and this demo will return a structured starter checklist.</p></div></div>
+      <label class="field-label" for="agent-prompt">What should this agent work on?</label><textarea id="agent-prompt" class="field prompt-field" rows="3" placeholder="A galaxy-themed exploration game with strange planets..." required></textarea>
+      <div class="dialog-note">Demo responses are generated in your browser. Connect a backend and AI provider to enable real AI reasoning.</div>
+      <button class="create-btn dialog-submit" id="agent-run" type="button">✦ Run demo agent</button>
     </form>
   </dialog>
   <script src="script.js"></script>
