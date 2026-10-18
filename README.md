@@ -1,28 +1,37 @@
 # PromptSim
 
-A lightweight, WebSim-inspired discovery gallery for prompt-built projects.
+PromptSim is a galaxy-themed AI coding workspace and project discovery gallery.
 
-## Open the website
+## Live website
 
-**Live website:** https://cartermmoore-create.github.io/PromptSim/
+https://cartermmoore-create.github.io/PromptSim/
 
-GitHub Actions automatically publishes the static site to GitHub Pages whenever changes are pushed to `main`. On the first deployment, GitHub may take a few minutes to publish it. Check the repository's **Actions** tab for the deployment status.
+## AI coding workspace
 
-## Features
-- Purple galaxy UI using the supplied orb logo
-- Four interactive local agent playgrounds: Cosmos Builder, Code Pilot, Art Director, and QA Scout
-- Creator handles kept visible for the six reference projects
-- Credited remix flow starts a separate project with a fresh prompt; it does not overwrite the source
-- Clear local-only ownership notes; projects are saved in browser storage and are not uploaded
-- Dark responsive discovery UI with top search, category filters, and a right-side navigation rail
-- Project cards with illustrated SVG thumbnail art, creators, views, and likes
-- Search by project name, creator, prompt, or category
-- Create a project from a prompt and save it in the visitor's browser
-- Preview projects and create credited remixes using a fresh prompt
-- Responsive layout for desktop and mobile
+Open **AI Studio** or click **Create**. Describe a website or browser game, choose a model, and press **Build with AI**. The coding agent generates three real source files (`index.html`, `styles.css`, and `script.js`), loads them into a sandboxed live preview, and lets you ask follow-up prompts to update the existing code.
+
+Available model choices:
+- Gemini 3.8 Flash
+- Claude Sonnet 5
+- GPT-5.6 Luna
+
+AI calls use [Puter.js](https://docs.puter.com/AI/chat/), so PromptSim does not embed a private API key or require a deployed backend. Users may need to sign in through Puter. AI usage is subject to the user's Puter account, model availability, and usage limits.
+
+Features include:
+- Editable HTML, CSS, and JavaScript source
+- Sandboxed preview and live refresh while editing
+- ZIP download containing the generated source files
+- Optional publishing through Puter hosting
+- Browser-local draft saving
+
+## Creator attribution
+
+The six reference projects keep the creator handles visible. The remix workflow tells the model to create a distinct project from a high-level inspiration rather than copying the source project's code, layout, art, text, or exact mechanics. The source card is never overwritten.
 
 ## Run locally
-Open `index.html` in your browser. No build step or dependencies are required.
 
-## Important note
-This is a static frontend starter. Creating a project currently saves its title and prompt in the visitor's browser; it does not generate a working game or website from the prompt, and projects do not sync between users. The agent panels are interactive local demos that return structured starter checklists; they do not call an AI model. Real AI generation needs a secure backend/API integration. Shared projects require a backend and explicit publishing controls.
+Serve the folder with a local HTTP server (for example, `python -m http.server`) or use GitHub Pages. The Puter.js SDK requires a supported website origin; opening index.html directly with a `file://` URL may not support sign-in.
+
+## Notes
+
+Generated websites run inside a sandboxed iframe in PromptSim. Review generated code and external dependencies before publishing. AI-generated code can contain bugs and may need follow-up changes. The gallery's sample metrics and sample projects are illustrative.
