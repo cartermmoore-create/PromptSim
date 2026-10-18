@@ -18,7 +18,7 @@ GitHub Actions automatically publishes the static site to GitHub Pages whenever 
 - Project cards with illustrated SVG thumbnail art, creators, views, and likes
 - Search by project name, creator, prompt, or category
 - Create a project from a prompt and save it in the visitor's browser
-- Preview and remix project prompts
+- Preview projects and create credited remixes using a fresh prompt
 - Responsive layout for desktop and mobile
 
 ## Run locally
