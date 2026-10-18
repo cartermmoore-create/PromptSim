@@ -32,43 +32,70 @@
       <button class="filter" data-filter="For You">♡ <span>For You</span></button>
       <button class="filter sort-filter" id="sort-menu">♜ <span>Top · Month</span><span class="chevron">⌄</span></button>
     </div>
-    <section class="agents-view studio-view" id="agents-view" hidden aria-labelledby="studio-heading">
-      <div class="studio-heading-row">
-        <div><span class="eyebrow">PROMPT → CODE → PREVIEW</span><h2 id="studio-heading">Build something real.</h2><p>Give an LLM an idea. It writes the files, you run the preview, then ask it to change anything.</p></div>
-        <span class="live-llm-badge"><span></span> REAL LLM CODING</span>
+    <section class="agents-view studio-view" id="agents-view" hidden aria-label="AI coding workspace">
+      <div class="workspace-shell">
+        <header class="workspace-topbar">
+          <div class="workspace-brand-area"><button class="workspace-exit" id="workspace-close" type="button" title="Back to PromptSim">← <span>PromptSim</span></button><span class="workspace-project-name" id="workspace-project-name">Untitled project</span></div>
+          <div class="workspace-preview-controls" aria-label="Preview controls">
+            <button class="workspace-icon-btn" id="refresh-preview" type="button" title="Refresh preview">↻</button>
+            <span class="workspace-control-divider"></span>
+            <button class="workspace-device-btn active" type="button" data-preview-mode="desktop" title="Desktop preview">▰</button>
+            <button class="workspace-device-btn" type="button" data-preview-mode="mobile" title="Mobile preview">▯</button>
+          </div>
+          <div class="workspace-version-group"><span class="workspace-version" id="workspace-version">v1 draft</span><span class="workspace-draft-dot"></span><span id="workspace-save-state">unsaved</span></div>
+        </header>
+        <div class="workspace-main">
+          <section class="workspace-preview-column" aria-label="Live project preview">
+            <div class="workspace-preview-stage" id="workspace-preview-stage">
+              <iframe id="app-preview" title="AI-generated website or game preview" sandbox="allow-scripts allow-forms" referrerpolicy="no-referrer" srcdoc="<!doctype html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'></head><body style='margin:0;background:#fff;color:#72727c;font:16px system-ui;display:grid;place-items:center;min-height:100vh;text-align:center'><div style='max-width:360px;padding:24px'><div style='font-size:28px;margin-bottom:16px'>✧</div><div style='font-size:16px'>Nothing here yet — ask the agent to build something.</div></div></body></html>"></iframe>
+              <div class="workspace-code-drawer" id="workspace-code-drawer" hidden>
+                <section class="editor-window">
+                  <header class="studio-panel-header"><div><strong>Source files</strong><span class="file-count" id="file-count">3 files</span></div><button class="panel-icon-btn" id="download-app" type="button" title="Download all source files as ZIP">↓ ZIP</button></header>
+                  <nav class="code-tabs" aria-label="Source files"><button class="code-tab active" data-file="html" type="button"><span>◈</span> index.html</button><button class="code-tab" data-file="css" type="button"><span>◈</span> styles.css</button><button class="code-tab" data-file="js" type="button"><span>◈</span> script.js</button></nav>
+                  <textarea id="code-editor" class="code-editor" aria-label="Editable project source code" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" placeholder="Generated source appears here. Edit directly, then apply changes."></textarea>
+                  <div class="editor-actions"><span id="editor-status">Your code files will appear here after a build.</span><button class="secondary-action" id="apply-code" type="button">Apply changes</button></div>
+                </section>
+              </div>
+              <div class="workspace-history-popover" id="workspace-history-panel" hidden>
+                <div class="history-popover-head"><strong>Build history</strong><button id="close-history" type="button" aria-label="Close history">×</button></div>
+                <div id="workspace-history-list"><p>Your build versions will appear here.</p></div>
+              </div>
+            </div>
+            <footer class="workspace-preview-footer"><span><i></i> Sandboxed preview</span><span id="preview-size">No build yet</span><button id="workspace-code-toggle" type="button">⌘ Source code</button></footer>
+          </section>
+          <aside class="workspace-agent-panel" aria-label="AI coding agent">
+            <header class="workspace-agent-header">
+              <nav class="workspace-mode-tabs" aria-label="Workspace tools"><button class="workspace-mode active" type="button" data-workspace-mode="Build">✧ Build</button><button class="workspace-mode" id="workspace-history" type="button">◴ History</button></nav>
+              <button class="workspace-post" id="publish-app" type="button" title="Publish this website using your Puter account">Post ↗</button>
+            </header>
+            <div class="workspace-agent-context"><span class="agent-context-icon">✦</span><div><strong>PromptSim Agent</strong><span>Code · Preview · Iterate</span></div><button id="connect-ai" class="workspace-signin" type="button">Sign in</button></div>
+            <div class="workspace-chat" id="workspace-chat" aria-live="polite">
+              <div class="workspace-chat-empty" id="workspace-chat-empty"><div class="workspace-chat-spark">✦</div><h2>What should we change?</h2><p>Describe what you want to build. The coding agent creates the files and runs them in the preview. Follow-up prompts can edit the existing code.</p></div>
+            </div>
+            <div class="workspace-composer-area">
+              <label class="field-label" for="builder-prompt">Build something new or describe an edit</label>
+              <textarea id="builder-prompt" class="workspace-prompt-input" rows="4" placeholder="Make a website with a purple galaxy background, animated planets, and a project gallery…" spellcheck="true"></textarea>
+              <div class="workspace-attachment-row"><input id="attach-files" type="file" accept=".html,.css,.js,.json,.txt,.md" multiple hidden><button id="attach-files-trigger" class="workspace-attach-btn" type="button">＋ Attach files</button><span id="attachment-label">Optional source context</span></div>
+              <div class="workspace-composer-bottom"><label class="model-picker workspace-model-picker"><span>MODEL</span><select id="ai-model" aria-label="Choose an AI coding model"><option value="">Loading available models…</option></select></label><button class="create-btn generate-btn" id="generate-app" type="button"><span>↑</span> Build</button></div>
+              <div class="generation-status" id="generation-status" role="status" aria-live="polite"><span class="status-dot"></span><span id="generation-status-text">Ready. Describe what you want to build.</span></div>
+              <div class="workspace-disclaimer">The selected LLM writes code. Review generated files before publishing.</div>
+            </div>
+          </aside>
+          <nav class="workspace-tool-rail" aria-label="Project tools">
+            <button class="workspace-rail-btn active" type="button" data-preview-tool="preview" title="Preview" aria-label="Preview">▧</button>
+            <button class="workspace-rail-btn" id="workspace-code-tool" type="button" title="Source files" aria-label="Source files">&lt;/&gt;</button>
+            <button class="workspace-rail-btn" id="workspace-history-tool" type="button" title="Build history" aria-label="Build history">◴</button>
+            <span class="workspace-tool-spacer"></span>
+            <button class="workspace-rail-btn" id="workspace-home-tool" type="button" title="Return to PromptSim" aria-label="Return to PromptSim">⌂</button>
+          </nav>
+        </div>
+        <div class="workspace-toast" id="workspace-toast" hidden></div>
       </div>
-      <div class="studio-toolbar">
-        <div class="provider-summary"><div class="provider-mark">✦</div><div><strong>PromptSim AI engine</strong><span>Multi-model access via Puter.js</span></div></div>
-        <label class="model-picker"><span>MODEL</span><select id="ai-model" aria-label="Choose AI coding model"><option value="gemini-3.8-flash">Gemini 3.8 Flash · Google</option><option value="claude-sonnet-5">Claude Sonnet 5 · Anthropic</option><option value="gpt-5.6-luna">GPT-5.6 Luna · OpenAI</option></select></label>
-        <button class="connect-ai-btn" id="connect-ai" type="button">Sign in to use AI ↗</button>
-      </div>
-      <div class="builder-composer">
-        <label class="field-label" for="builder-prompt">What should the AI build or change?</label>
-        <textarea id="builder-prompt" class="field builder-prompt" rows="4" placeholder="Build a complete retro space exploration game with a title screen, keyboard movement, collectible stars, a minimap, and a purple galaxy UI. Make it playable, not just a mockup." spellcheck="true"></textarea>
-        <div class="prompt-examples"><span>Try:</span><button type="button" data-example="Build a polished personal portfolio website with dark purple gradients, project cards, a contact section, and mobile navigation.">Portfolio</button><button type="button" data-example="Make a playable 2D space survival game with arrow-key movement, drifting asteroids, energy pickups, collision detection, and a restart button.">Space game</button><button type="button" data-example="Create a responsive 2000s-style Flash game portal with animated cards, sound toggles, and a playful blue and lime interface.">Game portal</button></div>
-        <div class="builder-actions"><span class="builder-hint" id="builder-hint">The model writes HTML, CSS, and JavaScript files.</span><button class="create-btn generate-btn" id="generate-app" type="button"><span>✦</span> Build with AI</button></div>
-        <div class="generation-status" id="generation-status" role="status" aria-live="polite"><span class="status-dot"></span><span id="generation-status-text">Ready. Choose a model and describe what to build.</span></div>
-      </div>
-      <div class="studio-layout">
-        <section class="preview-window">
-          <header class="studio-panel-header"><div><span class="window-lights"><i></i><i></i><i></i></span><strong>Live preview</strong><span class="sandbox-tag">SANDBOX</span></div><button class="panel-icon-btn" id="refresh-preview" type="button" title="Refresh preview">↻</button></header>
-          <iframe id="app-preview" title="AI-generated app preview" sandbox="allow-scripts allow-forms" referrerpolicy="no-referrer" loading="lazy" srcdoc="<!doctype html><html><body style='margin:0;background:#100b18;color:#d7c4f3;font:15px system-ui;display:grid;place-items:center;min-height:100vh;text-align:center'><div><div style='font-size:38px'>✦</div><h2>Your creation appears here</h2><p>Describe a website or game, then press Build with AI.</p></div></body></html>"></iframe>
-          <div class="preview-footer"><span><i></i> JavaScript runs in a sandboxed preview</span><span id="preview-size">No build yet</span></div>
-        </section>
-        <section class="editor-window">
-          <header class="studio-panel-header"><div><strong>Source files</strong><span class="file-count" id="file-count">3 files</span></div><button class="panel-icon-btn" id="download-app" type="button" title="Download all source files as ZIP">↓ ZIP</button></header>
-          <nav class="code-tabs" aria-label="Source files"><button class="code-tab active" data-file="html" type="button"><span>◈</span> index.html</button><button class="code-tab" data-file="css" type="button"><span>◈</span> styles.css</button><button class="code-tab" data-file="js" type="button"><span>◈</span> script.js</button></nav>
-          <textarea id="code-editor" class="code-editor" aria-label="Editable project source code" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" placeholder="Generated source will appear here. You can edit it directly."></textarea>
-          <div class="editor-actions"><span id="editor-status">Edit code, then apply it to the preview.</span><button class="secondary-action" id="apply-code" type="button">Apply changes</button></div>
-          <div class="publish-bar"><button class="publish-btn" id="publish-app" type="button">↗ Publish website</button><span id="publish-result">Publish a live copy to your own Puter hosting after building.</span></div>
-        </section>
-      </div>
-      <div class="studio-footnote"><span>ⓘ</span><p><strong>Real AI, not a fake demo.</strong> PromptSim sends your prompt and project code to the model you choose through Puter.js. Sign-in and usage limits may apply. Generated code runs in a sandbox here; review it before publishing.</p><a href="https://docs.puter.com/AI/chat/" target="_blank" rel="noreferrer">AI engine docs ↗</a></div>
     </section>
     <div class="gallery-intro" id="gallery-intro"><div><span class="eyebrow">THE COMMUNITY UNIVERSE</span><h2 id="project-heading">Projects orbiting PromptSim</h2><p id="project-subheading">Explore ideas from their creators — with credit kept in view.</p></div><span class="project-count">CREATOR CREDIT INCLUDED</span></div>
     <aside class="ownership-note" aria-label="Creator ownership and attribution"><span class="ownership-star">✦</span><div><strong>Originals stay original.</strong><p>Creator names stay attached to projects. A remix starts a separate local project with visible inspiration credit; it never edits or replaces the source.</p></div></aside>
     <section class="gallery" id="gallery" aria-label="Discover projects"></section>
-    <div class="empty-state" id="empty-state" hidden><div class="empty-icon">⌕</div><h2>No projects found</h2><p>Try another search or choose a different filter.</p><button class="filter" id="reset-search">Clear search</button></div>
+    <div class="empty-state" id="empty-state" hidden><div class="empty-icon">✦</div><h2>Your universe starts here</h2><p>No starter or copied demo projects are installed. Build something original with a coding agent.</p><button class="create-btn" id="start-first-project" type="button">＋ Build your first project</button><button class="filter" id="reset-search">Clear search</button></div>
     <footer class="footer" id="about"><span>PromptSim</span><span>Dream it. Prompt it. Make it.</span><a href="https://github.com/cartermmoore-create/PromptSim">GitHub ↗</a></footer>
   </main>
   <dialog id="create-dialog" class="create-dialog">
