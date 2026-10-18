@@ -55,7 +55,7 @@ document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
   render();
 }));
 document.getElementById("reset-search").addEventListener("click",()=>{search.value="";state.query="";state.filter="Hot";render();});
-document.getElementById("start-first-project").addEventListener("click",openWorkspace);
+document.getElementById("start-first-project").addEventListener("click",openCreate);
 document.getElementById("sort-menu").addEventListener("click",()=>{const options=["Top · Month","Most liked","Newest"];const idx=options.indexOf(state.sort);state.sort=options[(idx+1)%options.length];document.querySelector("#sort-menu span:nth-child(2)").textContent=state.sort;render();});
 function openWorkspace(){
   state.view="Agents";
