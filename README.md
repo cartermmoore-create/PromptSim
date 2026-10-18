@@ -38,7 +38,8 @@ GitHub Pages cannot securely provide the open-source local OAuth callback. Offer
 - Full-screen coding workspace: browser preview on the left, AI conversation on the right.
 - Actual remote LLM generation through the authorized ChatGPT plan in the local-runtime mode.
 - HTML, CSS, and JavaScript files with a source editor and sandboxed preview.
-- Desktop/mobile preview modes, local build history, text file attachments, and ZIP export.
+- Desktop/mobile preview modes, persistent conversation context, local build history, text file attachments, and ZIP export.
+- Sandboxed runtime-error reporting with a **Fix preview errors** action that sends the error and current source back to the agent.
 - Projects and drafts stored locally in your browser; the homepage contains no copied demo projects.
 
 ## Creator ownership
