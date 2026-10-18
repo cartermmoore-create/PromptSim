@@ -40,7 +40,7 @@ function showPreview(p){
     d.close();
     state.remixSource={title:p.title,author:p.author||"Unknown creator"};
     document.getElementById("builder-prompt").value=`Build a new, original website or game that explores the broad theme of "${p.title}" by ${p.author||"an unknown creator"} as inspiration only. Do not copy the source project's code, layout, graphics, text, or exact mechanics. Invent a distinct visual identity and fresh interactions. Make it functional and polished. Include a small acknowledgement that this new project was inspired by ${p.title} by ${p.author||"an unknown creator"}.`;
-    state.view="Agents";render();
+    openWorkspace();
     document.getElementById("builder-prompt").focus();
     window.scrollTo({top:0,behavior:"smooth"});
   });
@@ -72,7 +72,42 @@ function closeWorkspace(){
   state.view="Home";
   render();
 }
-function openCreate(){openWorkspace();}
+function openCreate(){
+  if(currentFiles()){
+    const previousName=document.getElementById("workspace-project-name").textContent||"Previous project";
+    recordStudioHistory("Saved project: "+previousName);
+  }
+  state.studioFiles={html:"",css:"",js:""};
+  state.activeFile="html";
+  state.studioVersion=0;
+  state.attachments=[];
+  document.getElementById("builder-prompt").value="";
+  document.getElementById("attachment-label").textContent="Optional source context";
+  attachmentInput.value="";
+  document.getElementById("workspace-project-name").textContent="Untitled project";
+  document.getElementById("workspace-version").textContent="New draft";
+  document.getElementById("workspace-save-state").textContent="unsaved";
+  document.getElementById("builder-hint").textContent="Describe the website or browser game you want to build.";
+  document.getElementById("workspace-code-drawer").hidden=true;
+  document.getElementById("workspace-history-panel").hidden=true;
+  document.getElementById("workspace-code-toggle").classList.remove("active");
+  document.getElementById("workspace-code-tool").classList.remove("active");
+  document.getElementById("publish-result").replaceChildren();
+  const chat=document.getElementById("workspace-chat");
+  chat.replaceChildren();
+  const empty=document.createElement("div");empty.className="workspace-chat-empty";empty.id="workspace-chat-empty";
+  const spark=document.createElement("div");spark.className="workspace-chat-spark";spark.textContent="✦";
+  const title=document.createElement("h2");title.textContent="What should we build?";
+  const p=document.createElement("p");p.textContent="Describe a website or browser game. The coding agent will generate the files and run the result in the preview.";
+  empty.append(spark,title,p);chat.appendChild(empty);
+  showActiveCode();
+  previewFrame.srcdoc="<!doctype html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'></head><body style='margin:0;background:#fff;color:#72727c;font:16px system-ui;display:grid;place-items:center;min-height:100vh;text-align:center'><div style='max-width:360px;padding:24px'><div style='font-size:28px;margin-bottom:16px'>✧</div><div style='font-size:16px'>Nothing here yet — ask the agent to build something.</div></div></body></html>";
+  document.getElementById("preview-size").textContent="No build yet";
+  saveStudioLocally();
+  renderStudioHistory();
+  setBuildStatus("New project ready. Describe what you want to make.","info");
+  openWorkspace();
+}
 document.getElementById("workspace-close").addEventListener("click",closeWorkspace);
 document.getElementById("workspace-home-tool").addEventListener("click",closeWorkspace);
 document.getElementById("open-create").addEventListener("click",openCreate);
