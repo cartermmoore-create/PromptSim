@@ -44,7 +44,7 @@
           </div>
           <nav class="workspace-mode-tabs" aria-label="Workspace tools"><button class="workspace-mode active" type="button" data-workspace-mode="Build">Build</button><button class="workspace-mode" id="workspace-history" type="button">◴ History</button></nav>
           <div class="workspace-version-group"><span class="workspace-version" id="workspace-version">New draft</span><span class="workspace-draft-dot"></span><span id="workspace-save-state">unsaved</span></div>
-          <button class="workspace-post" id="publish-app" type="button" title="Export generated website source as a ZIP">Export ZIP ↓</button>
+          <button class="workspace-post" id="publish-app" type="button" title="Download the project source files as a ZIP">Export ZIP ↓</button>
         </header>
         <div class="workspace-main">
           <section class="workspace-preview-column" aria-label="Live project preview">
@@ -67,7 +67,7 @@
           </section>
           <aside class="workspace-agent-panel" aria-label="AI coding agent">
             
-            <div class="workspace-agent-context"><span class="agent-context-icon">✦</span><div><strong>PromptSim Coding Agent</strong><span>Local AI · runs in your browser</span></div><button id="connect-ai" class="workspace-signin" type="button">Load model</button></div><span id="publish-result" class="workspace-publish-result" aria-live="polite"></span>
+            <div class="workspace-agent-context"><span class="agent-context-icon">✦</span><div><strong>PromptSim Coding Agent</strong><span id="connection-label">ChatGPT plan · browser preview</span></div><button id="connect-ai" class="workspace-signin" type="button">Continue with ChatGPT</button></div><span id="publish-result" class="workspace-publish-result" aria-live="polite"></span>
             <div class="workspace-chat" id="workspace-chat" aria-live="polite">
               <div class="workspace-chat-empty" id="workspace-chat-empty"><div class="workspace-chat-spark">✦</div><h2>What should we change?</h2><p>Describe what you want to build. The coding agent creates the files and runs them in the preview. Follow-up prompts can edit the existing code.</p></div>
             </div>
@@ -75,9 +75,9 @@
               <label class="field-label" for="builder-prompt">Build something new or describe an edit</label>
               <textarea id="builder-prompt" class="workspace-prompt-input" rows="4" placeholder="Make a website with a purple galaxy background, animated planets, and a project gallery…" spellcheck="true"></textarea>
               <div class="workspace-attachment-row"><input id="attach-files" type="file" accept=".html,.css,.js,.json,.txt,.md" multiple hidden><button id="attach-files-trigger" class="workspace-attach-btn" type="button">＋ Attach files</button><span id="attachment-label">Optional source context</span></div>
-              <div class="workspace-composer-bottom"><label class="model-picker workspace-model-picker"><span>MODEL</span><select id="ai-model" aria-label="Choose a local AI coding model"><option value="Llama-3.2-3B-Instruct-q4f16_1-MLC">Llama 3.2 3B · better quality</option><option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B · low memory</option></select></label><button class="create-btn generate-btn" id="generate-app" type="button"><span>↑</span> Build</button></div>
+              <div class="workspace-composer-bottom"><label class="model-picker workspace-model-picker"><span>MODEL</span><select id="ai-model" aria-label="Choose a model available to your ChatGPT account"><option value="">Connect ChatGPT to load your models</option></select></label><button class="create-btn generate-btn" id="generate-app" type="button"><span>↑</span> Build</button></div>
               <div class="generation-status" id="generation-status" role="status" aria-live="polite"><span class="status-dot"></span><span id="generation-status-text">Ready. Describe what you want to build.</span></div>
-              <div class="workspace-disclaimer" id="builder-hint">Local AI runs in your browser with WebGPU. First load downloads model files. The 3B model needs about 2.3 GB GPU memory; the 1B model needs about 0.9 GB. No API key or credits required.</div>
+              <div class="workspace-disclaimer" id="builder-hint">ChatGPT powers code generation remotely. Your created website/game runs in this browser preview; no local AI model is downloaded.</div>
             </div>
           </aside>
           <nav class="workspace-tool-rail" aria-label="Project tools">
