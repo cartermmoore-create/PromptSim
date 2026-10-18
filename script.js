@@ -70,13 +70,14 @@ function showPreview(p){
 }
 search.addEventListener("input",()=>{state.query=search.value;render();});
 document.querySelectorAll(".filter[data-filter]").forEach(b=>b.addEventListener("click",()=>{state.filter=b.dataset.filter;render();}));
-document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{state.view=b.dataset.view;if(state.view==="Feed"){state.filter="New";}else if(state.view==="Home"){state.filter="Hot";}render();}));
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{state.view=b.dataset.view;if(state.view==="Feed"){state.filter="All";}else if(state.view==="Home"){state.filter="Hot";}render();}));
 document.getElementById("reset-search").addEventListener("click",()=>{search.value="";state.query="";state.filter="Hot";render();});
 document.getElementById("sort-menu").addEventListener("click",()=>{const options=["Top · Month","Most liked","Newest"];const idx=options.indexOf(state.sort);state.sort=options[(idx+1)%options.length];document.querySelector("#sort-menu span:nth-child(2)").textContent=state.sort;render();});
 function openCreate(){state.remixSource=null;document.getElementById("create-note").textContent="Your title and prompt are saved only in this browser. No project is uploaded or shared.";dialog.showModal();}
+document.getElementById("close-create").addEventListener("click",()=>dialog.close());
 document.getElementById("open-create").addEventListener("click",openCreate);document.getElementById("rail-create").addEventListener("click",openCreate);
 document.getElementById("create-form").addEventListener("submit",e=>e.preventDefault());
-document.getElementById("make-project").addEventListener("click",e=>{const name=document.getElementById("project-name").value.trim();const prompt=document.getElementById("project-prompt").value.trim();if(!name||!prompt){e.preventDefault();toast("Add a project name and describe your idea first.");return;}const source=state.remixSource;const p={title:name,author:"@you",avatar:"✦",category:"New",tags:["For You"],views:"1",likes:"0",art:"custom",prompt,custom:true,inspiredBy:source?{title:source.title,author:source.author}:null,created:Date.now()};state.remixSource=null;state.custom.unshift(p);try{const saved=JSON.parse(localStorage.getItem("promptsim-projects")||"[]");saved.unshift({title:name,prompt,created:p.created,inspiredBy:p.inspiredBy});localStorage.setItem("promptsim-projects",JSON.stringify(saved.slice(0,30)));}catch{}state.filter="New";search.value="";state.query="";dialog.close();document.getElementById("project-name").value="";document.getElementById("project-prompt").value="";render();toast("Project added to your gallery.");window.scrollTo({top:0,behavior:"smooth"});});
+document.getElementById("make-project").addEventListener("click",e=>{const name=document.getElementById("project-name").value.trim();const prompt=document.getElementById("project-prompt").value.trim();if(!name||!prompt){e.preventDefault();toast("Add a project name and describe your idea first.");return;}const source=state.remixSource;const p={title:name,author:"@you",avatar:"✦",category:"New",tags:["For You"],views:"1",likes:"0",art:"custom",prompt,custom:true,inspiredBy:source?{title:source.title,author:source.author}:null,created:Date.now()};state.remixSource=null;state.custom.unshift(p);try{const saved=JSON.parse(localStorage.getItem("promptsim-projects")||"[]");saved.unshift({title:name,prompt,created:p.created,inspiredBy:p.inspiredBy});localStorage.setItem("promptsim-projects",JSON.stringify(saved.slice(0,30)));}catch{}state.view="Home";state.filter="New";search.value="";state.query="";dialog.close();document.getElementById("project-name").value="";document.getElementById("project-prompt").value="";render();toast("Project added to your gallery.");window.scrollTo({top:0,behavior:"smooth"});});
 try{const saved=JSON.parse(localStorage.getItem("promptsim-projects")||"[]");state.custom=saved.map(p=>({title:p.title,author:"@you",avatar:"✦",category:"New",tags:["For You"],views:"1",likes:"0",art:"custom",prompt:p.prompt,custom:true,inspiredBy:p.inspiredBy||null,created:p.created}));}catch{}
 
 const agentProfiles = {
@@ -98,7 +99,7 @@ function openAgent(id){
   welcome.append(strong,p);chat.appendChild(welcome);document.getElementById("agent-dialog").showModal();
 }
 document.querySelectorAll("[data-agent]").forEach(button=>button.addEventListener("click",()=>openAgent(button.dataset.agent)));
-document.getElementById("agent-form").addEventListener("submit",e=>e.preventDefault());
+document.getElementById("close-agent").addEventListener("click",()=>document.getElementById("agent-dialog").close());
 document.getElementById("agent-run").addEventListener("click",()=>{
   const prompt=document.getElementById("agent-prompt").value.trim();if(!prompt){toast("Describe a project first.");return;}
   const chat=document.getElementById("agent-chat");
