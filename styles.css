@@ -249,3 +249,9 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;op
   .workspace-model-picker select{font-size:9px}
   .workspace-composer-bottom .generate-btn{min-width:67px;padding:8px}
 }
+
+
+/* Local model status and compact selection */
+.workspace-model-picker select{width:100%;text-overflow:ellipsis;overflow:hidden}
+.workspace-disclaimer{max-width:100%;color:#a29aaa}
+.workspace-agent-context>div span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
