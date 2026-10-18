@@ -1,0 +1,13 @@
+{
+  "name": "promptsim",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "PromptSim browser-based AI coding workspace",
+  "scripts": {
+    "local": "node scripts/start-local.mjs"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
