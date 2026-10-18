@@ -44,7 +44,7 @@
           </div>
           <nav class="workspace-mode-tabs" aria-label="Workspace tools"><button class="workspace-mode active" type="button" data-workspace-mode="Build">Build</button><button class="workspace-mode" id="workspace-history" type="button">◴ History</button></nav>
           <div class="workspace-version-group"><span class="workspace-version" id="workspace-version">New draft</span><span class="workspace-draft-dot"></span><span id="workspace-save-state">unsaved</span></div>
-          <button class="workspace-post" id="publish-app" type="button" title="Publish this website using your Puter account">Post ↗</button>
+          <button class="workspace-post" id="publish-app" type="button" title="Export generated website source as a ZIP">Export ZIP ↓</button>
         </header>
         <div class="workspace-main">
           <section class="workspace-preview-column" aria-label="Live project preview">
@@ -75,7 +75,7 @@
               <label class="field-label" for="builder-prompt">Build something new or describe an edit</label>
               <textarea id="builder-prompt" class="workspace-prompt-input" rows="4" placeholder="Make a website with a purple galaxy background, animated planets, and a project gallery…" spellcheck="true"></textarea>
               <div class="workspace-attachment-row"><input id="attach-files" type="file" accept=".html,.css,.js,.json,.txt,.md" multiple hidden><button id="attach-files-trigger" class="workspace-attach-btn" type="button">＋ Attach files</button><span id="attachment-label">Optional source context</span></div>
-              <div class="workspace-composer-bottom"><label class="model-picker workspace-model-picker"><span>MODEL</span><select id="ai-model" aria-label="Choose an AI coding model"><option value="">Loading available models…</option></select></label><button class="create-btn generate-btn" id="generate-app" type="button"><span>↑</span> Build</button></div>
+              <div class="workspace-composer-bottom"><label class="model-picker workspace-model-picker"><span>MODEL</span><select id="ai-model" aria-label="Choose a free AI coding model"><option value="openrouter/free">OpenRouter · Free Models Router</option></select></label><button class="create-btn generate-btn" id="generate-app" type="button"><span>↑</span> Build</button></div>
               <div class="generation-status" id="generation-status" role="status" aria-live="polite"><span class="status-dot"></span><span id="generation-status-text">Ready. Describe what you want to build.</span></div>
               <div class="workspace-disclaimer" id="builder-hint">The selected LLM writes code. Review generated files before publishing.</div>
             </div>
@@ -106,8 +106,22 @@
       <button class="create-btn dialog-submit" id="make-project" value="default">＋ Create project</button>
     </form>
   </dialog>
+
+  <dialog id="openrouter-dialog" class="create-dialog openrouter-dialog">
+    <form method="dialog" id="openrouter-form">
+      <div class="dialog-head"><div><span class="eyebrow">FREE MODEL ROUTER</span><h2>Connect your AI</h2><p class="agent-dialog-description">Use OpenRouter's free-model router instead of Puter credits.</p></div><button class="icon-btn" id="close-openrouter-dialog" type="button" aria-label="Close">✕</button></div>
+      <p class="key-explainer">Create an OpenRouter API key, paste it below, and PromptSim will use it only for AI coding requests from this tab.</p>
+      <a class="key-link" href="https://openrouter.ai/settings/keys" target="_blank" rel="noreferrer">Get an OpenRouter API key ↗</a>
+      <label class="field-label" for="openrouter-key">OpenRouter API key</label>
+      <div class="key-input-row"><input id="openrouter-key" class="field" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-or-v1-…" aria-describedby="openrouter-key-note"><button class="icon-btn" id="toggle-openrouter-key" type="button" aria-label="Show API key">◉</button></div>
+      <div class="dialog-note" id="openrouter-key-note">Your key stays in memory in this tab and is sent only to OpenRouter. It is not saved to local storage or committed to GitHub. Never paste a key into a public repository.</div>
+      <div class="key-connect-status" id="openrouter-connect-status" role="status" aria-live="polite"></div>
+      <div class="key-dialog-actions"><button class="secondary-action" id="clear-openrouter-key" type="button">Disconnect</button><button class="create-btn" id="save-openrouter-key" type="button">Use free AI</button></div>
+      <p class="key-free-note">The selected <code>openrouter/free</code> router has zero token pricing, but availability and free-tier request limits still apply.</p>
+    </form>
+  </dialog>
+
   
-  <script src="https://js.puter.com/v2/"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="script.js"></script>
 </body>
