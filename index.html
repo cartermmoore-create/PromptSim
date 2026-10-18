@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#171717">
+  <meta name="description" content="PromptSim — discover, remix, and create things from prompts.">
+  <title>PromptSim — make something</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="PromptSim home"><span class="brand-orb">✳</span><span>prompt<span class="brand-accent">sim</span></span></a>
+    <label class="searchbox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Search projects..." autocomplete="off"></label>
+    <div class="top-actions"><a class="top-link socials" href="#community" title="Community">◎</a><a class="top-link socials" href="#community" title="Updates">♥</a><a class="top-link" href="#about">About</a><button class="create-btn" id="open-create"><span>＋</span> Create</button></div>
+  </header>
+  <aside class="rail" aria-label="Quick navigation">
+    <a class="rail-logo" href="#" title="Home"><span class="brand-orb">✳</span></a>
+    <a href="#activity" aria-label="Activity" title="Activity">♧</a>
+    <a href="#liked" aria-label="Liked projects" title="Liked projects">♡</a>
+    <a href="#collections" aria-label="Collections" title="Collections">▱</a>
+    <button id="rail-create" aria-label="Create project" title="Create project">＋</button>
+    <span class="rail-spacer"></span><a href="#community" aria-label="Community" title="Community">◇</a><a href="#about" aria-label="About PromptSim" title="About PromptSim">☷</a><a href="#profile" aria-label="Profile" title="Profile">◉</a>
+  </aside>
+  <main class="page">
+    <nav class="primary-tabs" aria-label="Primary"><button class="tab active" data-view="Home"><span>⌂</span> Home</button><button class="tab" data-view="Feed"><span>▤</span> Feed</button></nav>
+    <div class="filters" aria-label="Project filters">
+      <button class="filter active" data-filter="Hot">⌁ <span>Hot</span></button>
+      <button class="filter" data-filter="Multiplayer">◉ <span>Multiplayer</span></button>
+      <button class="filter" data-filter="New">▤ <span>New</span></button>
+      <button class="filter" data-filter="Featured">☆ <span>Featured</span></button>
+      <button class="filter" data-filter="For You">♡ <span>For You</span></button>
+      <button class="filter sort-filter" id="sort-menu">♜ <span>Top · Month</span><span class="chevron">⌄</span></button>
+    </div>
+    <section class="gallery" id="gallery" aria-label="Discover projects"></section>
+    <div class="empty-state" id="empty-state" hidden><div class="empty-icon">⌕</div><h2>No projects found</h2><p>Try another search or choose a different filter.</p><button class="filter" id="reset-search">Clear search</button></div>
+    <footer class="footer" id="about"><span>PromptSim</span><span>Dream it. Prompt it. Make it.</span><a href="https://github.com/cartermmoore-create/PromptSim">GitHub ↗</a></footer>
+  </main>
+  <dialog id="create-dialog" class="create-dialog">
+    <form method="dialog" id="create-form">
+      <div class="dialog-head"><div><span class="eyebrow">PROMPTSIM STUDIO</span><h2>What are we making?</h2></div><button class="icon-btn" value="cancel" aria-label="Close">✕</button></div>
+      <label class="field-label" for="project-name">Project name</label><input id="project-name" class="field" maxlength="60" placeholder="A tiny world, a game, a tool..." required>
+      <label class="field-label" for="project-prompt">Describe your idea</label><textarea id="project-prompt" class="field prompt-field" rows="4" placeholder="A dreamy low-poly island with glowing mushrooms..." required></textarea>
+      <div class="dialog-note">This starter gallery saves your project locally in this browser.</div>
+      <button class="create-btn dialog-submit" id="make-project" value="default">＋ Create project</button>
+    </form>
+  </dialog>
+  <script src="script.js"></script>
+</body>
+</html>
