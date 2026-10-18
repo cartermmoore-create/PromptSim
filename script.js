@@ -324,107 +324,122 @@ function buildUserMessage(request){
   if(!currentFiles())return "Build a new project from this request.\n\nUSER REQUEST:\n"+request+attachmentContext+"\n\nReturn complete working files, not a plan.";
   return "Modify the current project according to the user's request below. Preserve unrelated working features. Return the full updated contents of all three files.\n\nUSER REQUEST:\n"+request+attachmentContext+"\n\nCURRENT FILES (edit these, do not discard unrelated behavior):\n--- index.html ---\n"+state.studioFiles.html+"\n--- styles.css ---\n"+state.studioFiles.css+"\n--- script.js ---\n"+state.studioFiles.js;
 }
-function loadAvailableModels(){
+const isLocalChatGPTRuntime=["127.0.0.1","localhost"].includes(location.hostname)&&location.port==="4173";
+function showRuntimeHelp(){
+  const result=document.getElementById("publish-result");
+  result.replaceChildren();
+  const note=document.createElement("p");
+  note.className="runtime-help-note";
+  note.textContent="The public GitHub Pages site cannot use your ChatGPT plan directly until OpenAI approves hosted access. Run PromptSim locally to use the official ChatGPT-plan connection; generated websites and games still play in this browser preview.";
+  const setup=document.createElement("a");
+  setup.href="https://github.com/cartermmoore-create/PromptSim#run-with-your-chatgpt-plan";
+  setup.target="_blank";setup.rel="noopener noreferrer";setup.textContent="Local setup instructions ↗";
+  const access=document.createElement("a");
+  access.href="https://openai.com/form/sign-in-with-chatgpt-interest/";
+  access.target="_blank";access.rel="noopener noreferrer";access.textContent="Request hosted access ↗";
+  result.append(note,setup,document.createTextNode(" · "),access);
+}
+async function readRuntimeJSON(path,options={}){
+  const response=await fetch(path,{cache:"no-store",...options});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||("Request failed ("+response.status+")."));
+  return data;
+}
+async function loadAvailableModels(){
   const button=document.getElementById("connect-ai");
   const select=document.getElementById("ai-model");
-  if(!navigator.gpu){
-    button.textContent="WebGPU unavailable";
-    setBuildStatus("This browser/device does not expose WebGPU, which the local model requires. Try updating your browser and enabling hardware acceleration.","error");
-  }else{
-    button.textContent="Load model";
-    setBuildStatus("Free local AI is ready. Loading the model downloads it to your browser; no API key or account credits are needed.","info");
+  const label=document.getElementById("connection-label");
+  if(!isLocalChatGPTRuntime){
+    button.textContent="Use ChatGPT plan locally";
+    label.textContent="ChatGPT plan · local runtime";
+    select.replaceChildren();
+    const option=document.createElement("option");
+    option.value="";option.textContent="Open the local app to load available models";
+    select.appendChild(option);
+    setBuildStatus("To use your ChatGPT subscription without API credits, run PromptSim's supported local runtime. AI inference is remote; the generated app/game preview stays in your browser.","info");
+    return;
   }
-  select.addEventListener("change",()=>{
-    button.textContent=state.localEngine&&state.loadedModel===select.value?"Model ready ✓":"Load model";
-    if(state.localEngine&&state.loadedModel!==select.value)setBuildStatus("Model selection changed. Press Load model to switch models.","info");
-  });
-}
-async function ensureLocalModel(){
-  const selected=document.getElementById("ai-model").value;
-  if(!selected)throw new Error("Choose a local model first.");
-  if(state.localEngine&&state.loadedModel===selected)return state.localEngine;
-  if(state.localModelPromise)return state.localModelPromise;
-  if(!navigator.gpu)throw new Error("WebGPU is unavailable in this browser or device. Try the latest Chrome or Edge with hardware acceleration enabled.");
-  const button=document.getElementById("connect-ai");
-  button.disabled=true;button.textContent="Loading…";
-  state.localModelPromise=(async()=>{
-    setBuildStatus("Preparing local model. First-time setup downloads model files; this can take a few minutes.","working");
-    const webllm=await import("https://esm.run/@mlc-ai/web-llm");
-    const onProgress=report=>{
-      const message=report?.text||"Loading model weights…";
-      setBuildStatus(message,"working");
-      document.getElementById("builder-hint").textContent=message;
-      document.getElementById("workspace-save-state").textContent="loading model";
-      button.textContent="Loading…";
-    };
-    let engine;
-    if(state.localEngine&&typeof state.localEngine.reload==="function"){
-      engine=state.localEngine;
-      await engine.reload(selected,{initProgressCallback:onProgress});
-    }else{
-      engine=await webllm.CreateMLCEngine(selected,{initProgressCallback:onProgress});
+  button.textContent="Continue with ChatGPT";
+  label.textContent="ChatGPT plan · checking connection";
+  select.replaceChildren();
+  const loading=document.createElement("option");loading.value="";loading.textContent="Loading ChatGPT models…";select.appendChild(loading);
+  try{
+    const status=await readRuntimeJSON("/api/status");
+    state.chatgptSession=status.session||null;
+    if(!state.chatgptSession||!state.chatgptSession.sharing){
+      select.replaceChildren();
+      const option=document.createElement("option");option.value="";option.textContent="Connect ChatGPT to load your models";select.appendChild(option);
+      label.textContent="ChatGPT plan · not connected";
+      button.textContent="Continue with ChatGPT";
+      setBuildStatus("Connect your ChatGPT account, then approve plan usage in the consent flow. No API key or local model download is needed.","info");
+      return;
     }
-    state.localEngine=engine;state.loadedModel=selected;
-    document.getElementById("workspace-save-state").textContent=currentFiles()?"saved locally":"ready";
-    document.getElementById("builder-hint").textContent="Local model ready. Prompts and generation stay in this browser.";
-    setBuildStatus("Local model ready. Your prompts run on this device; no provider credits are used.","success");
-    button.textContent="Model ready ✓";
-    return engine;
-  })();
-  try{return await state.localModelPromise;}
-  finally{
-    state.localModelPromise=null;button.disabled=false;
-    button.textContent=state.localEngine&&state.loadedModel===document.getElementById("ai-model").value?"Model ready ✓":"Load model";
+    const response=await readRuntimeJSON("/api/models");
+    const models=Array.isArray(response.models)?response.models:[];
+    select.replaceChildren();
+    for(const model of models){
+      if(!model||!model.slug)continue;
+      const option=document.createElement("option");
+      option.value=model.slug;option.textContent=model.displayName||model.slug;select.appendChild(option);
+    }
+    state.modelsLoaded=select.options.length>0;
+    if(!state.modelsLoaded)throw new Error("No models were returned for this ChatGPT account.");
+    label.textContent="Connected to ChatGPT · using your plan";
+    button.textContent="ChatGPT connected ✓";
+    document.getElementById("workspace-save-state").textContent="ChatGPT connected";
+    setBuildStatus("ChatGPT connected. Prompts are sent to OpenAI through your authorized plan; the generated app runs in the browser preview.","success");
+  }catch(error){
+    console.error("Could not load ChatGPT models:",error);
+    select.replaceChildren();
+    const option=document.createElement("option");option.value="";option.textContent="Unable to load ChatGPT models";select.appendChild(option);
+    label.textContent="ChatGPT · reconnect needed";
+    setBuildStatus("Could not check the ChatGPT connection: "+(error?.message||String(error)),"error");
   }
 }
 async function generateApp(){
   const prompt=document.getElementById("builder-prompt").value.trim();
   if(!prompt){setBuildStatus("Describe the website or game you want to build first.","error");return;}
   if(state.isGenerating)return;
+  if(!isLocalChatGPTRuntime){
+    setBuildStatus("ChatGPT-plan inference isn't enabled on this hosted page yet. Use the local PromptSim runtime or request OpenAI hosted access.","error");
+    showRuntimeHelp();return;
+  }
+  if(!state.chatgptSession?.sharing||!document.getElementById("ai-model").value){
+    setBuildStatus("Connect your ChatGPT account and enable plan usage before building.","error");return;
+  }
   state.isGenerating=true;buildButton.disabled=true;buildButton.classList.add("is-loading");
+  appendWorkspaceMessage("user",prompt);
+  document.getElementById("workspace-project-name").textContent=prompt.slice(0,38)+(prompt.length>38?"…":"");
+  document.getElementById("builder-hint").textContent="OpenAI is generating your website/game. You can play it here when the build is ready.";
+  setBuildStatus("Sending your request to OpenAI using your authorized ChatGPT plan…","working");
   try{
-    const engine=await ensureLocalModel();
-    appendWorkspaceMessage("user",prompt);
-    document.getElementById("workspace-project-name").textContent=prompt.slice(0,38)+(prompt.length>38?"…":"");
-    document.getElementById("builder-hint").textContent="The local model is writing HTML, CSS and JavaScript…";
-    setBuildStatus("Generating with "+document.getElementById("ai-model").selectedOptions[0].textContent+" on this device…","working");
-    const userContent=buildUserMessage(prompt);
-    const estimatedInputTokens=Math.ceil((CODING_SYSTEM_PROMPT.length+userContent.length)/3.5);
-    if(estimatedInputTokens>3200){
-      throw new Error("This project is too large for the local model's 4K context window. Try a smaller change or simplify the current code first.");
-    }
-    const outputBudget=Math.max(700,Math.min(3000,3800-estimatedInputTokens));
-    const result=await engine.chat.completions.create({
-      messages:[
-        {role:"system",content:CODING_SYSTEM_PROMPT},
-        {role:"user",content:userContent}
-      ],
-      temperature:0.2,
-      max_tokens:outputBudget,
-      response_format:{type:"json_object"}
+    const requestPrompt=buildUserMessage(prompt);
+    const response=await readRuntimeJSON("/api/generate",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:document.getElementById("ai-model").value,prompt:requestPrompt})
     });
-    const project=parseGeneratedProject(result);
+    const project=parseGeneratedProject(response.text);
     const hadPrevious=!!currentFiles();
     if(hadPrevious)recordStudioHistory("Before AI edit");
     state.studioFiles=project.files;
     state.studioVersion=hadPrevious?Math.max(1,state.studioVersion||1)+1:1;
     state.activeFile="html";showActiveCode();refreshAppPreview();
-    document.getElementById("editor-status").textContent="Generated by the local model. You can edit this code.";
+    document.getElementById("editor-status").textContent="Generated remotely through ChatGPT. You can edit this code.";
     document.getElementById("file-count").textContent="3 files";
     document.getElementById("builder-hint").textContent=project.summary;
     document.getElementById("preview-size").textContent="AI build ready";
-    setBuildStatus("Build complete. Test the preview, edit source, or ask for another change.","success");
-    appendWorkspaceMessage("assistant",project.summary+"\n\nGenerated index.html, styles.css, and script.js locally. The model did not call a remote AI API.");
+    setBuildStatus("Build complete. Play/test the preview, inspect the source, or ask the agent for another change.","success");
+    appendWorkspaceMessage("assistant",project.summary+"\n\nGenerated index.html, styles.css and script.js through your connected ChatGPT plan. This project runs in the browser preview.");
     document.getElementById("workspace-save-state").textContent="saved locally";
     updateWorkspaceVersion();renderStudioHistory();
     state.attachments=[];attachmentInput.value="";document.getElementById("attachment-label").textContent="Optional source context";
     state.remixSource=null;document.getElementById("builder-prompt").value="";
   }catch(error){
-    console.error("PromptSim local AI build failed:",error);
+    console.error("PromptSim ChatGPT build failed:",error);
     const message=error?.message||String(error);
-    setBuildStatus("Local build failed: "+message,"error");
+    setBuildStatus("Build failed: "+message,"error");
     appendWorkspaceMessage("assistant","The build failed and your previous code was preserved. "+message);
-    document.getElementById("builder-hint").textContent="Try a smaller request or switch to the lighter local model.";
+    document.getElementById("builder-hint").textContent="Check ChatGPT connection, account eligibility, usage limits, and request size; then try again.";
   }finally{
     state.isGenerating=false;buildButton.disabled=false;buildButton.classList.remove("is-loading");
   }
@@ -438,12 +453,24 @@ document.querySelectorAll("[data-example]").forEach(button=>button.addEventListe
   document.getElementById("builder-prompt").focus();
 }));
 document.getElementById("connect-ai").addEventListener("click",async()=>{
-  try{await ensureLocalModel();}
-  catch(error){
-    console.error("Could not load local model:",error);
-    setBuildStatus("Could not load local model: "+(error?.message||String(error)),"error");
-    document.getElementById("builder-hint").textContent="This requires a WebGPU-compatible browser and enough graphics memory. No API key or credits are required.";
-    document.getElementById("connect-ai").textContent="Retry model load";
+  if(!isLocalChatGPTRuntime){
+    showRuntimeHelp();
+    setBuildStatus("The hosted GitHub Pages app isn't approved for direct ChatGPT-plan use yet. Run PromptSim locally to connect through the official sign-in flow.","error");
+    return;
+  }
+  const button=document.getElementById("connect-ai");
+  button.disabled=true;button.textContent="Opening sign-in…";
+  setBuildStatus("Starting the official ChatGPT sign-in flow. Your browser will open to authorize PromptSim.","working");
+  try{
+    const result=await readRuntimeJSON("/api/sign-in",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+    state.chatgptSession=result.session||null;
+    if(!state.chatgptSession?.sharing)throw new Error(result.error||"This ChatGPT account did not enable plan usage for PromptSim.");
+    await loadAvailableModels();
+  }catch(error){
+    setBuildStatus("ChatGPT sign-in/permission failed: "+(error?.message||String(error)),"error");
+  }finally{
+    button.disabled=false;
+    if(!state.chatgptSession?.sharing)button.textContent="Continue with ChatGPT";
   }
 });
 document.querySelectorAll(".code-tab").forEach(button=>button.addEventListener("click",()=>{
