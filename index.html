@@ -23,7 +23,7 @@
     <span class="rail-spacer"></span><a href="#community" aria-label="Community" title="Community">◇</a><a href="#about" aria-label="About PromptSim" title="About PromptSim">☷</a><a href="#profile" aria-label="Profile" title="Profile">◉</a>
   </aside>
   <main class="page">
-    <nav class="primary-tabs" aria-label="Primary"><button class="tab active" data-view="Home"><span>⌂</span> Home</button><button class="tab" data-view="Feed"><span>▤</span> Feed</button><button class="tab" data-view="Agents"><span>✦</span> AI Agents</button></nav>
+    <nav class="primary-tabs" aria-label="Primary"><button class="tab active" data-view="Home"><span>⌂</span> Home</button><button class="tab" data-view="Feed"><span>▤</span> Feed</button><button class="tab" data-view="Agents"><span>✦</span> AI Studio</button></nav>
     <div class="filters" aria-label="Project filters">
       <button class="filter active" data-filter="Hot">⌁ <span>Hot</span></button>
       <button class="filter" data-filter="Multiplayer">◉ <span>Multiplayer</span></button>
@@ -32,23 +32,38 @@
       <button class="filter" data-filter="For You">♡ <span>For You</span></button>
       <button class="filter sort-filter" id="sort-menu">♜ <span>Top · Month</span><span class="chevron">⌄</span></button>
     </div>
-    <section class="agents-view" id="agents-view" hidden aria-labelledby="agents-heading">
-      <div class="gallery-intro agent-intro"><div><span class="eyebrow">YOUR CREATIVE CREW</span><h2 id="agents-heading">Meet your AI agents</h2><p>Specialized helpers for planning your next idea. This is a local UI demo, not a connected AI service.</p></div><span class="demo-pill"><span></span> DEMO MODE</span></div>
-      <div class="agent-grid">
-        <article class="agent-card" data-agent-card data-search="cosmos builder worldbuilding levels game narrative">
-          <div class="agent-card-top"><span class="agent-icon cosmos">✦</span><span class="agent-tag">WORLD DESIGN</span></div><h3>Cosmos Builder</h3><p>Shape a setting, its rules, locations, characters, and the secrets that tie it together.</p><button class="agent-open" data-agent="cosmos" type="button">Open agent <span>↗</span></button>
-        </article>
-        <article class="agent-card" data-agent-card data-search="code pilot code game website mechanics prototype">
-          <div class="agent-card-top"><span class="agent-icon code">&lt;/&gt;</span><span class="agent-tag">BUILD PLANNING</span></div><h3>Code Pilot</h3><p>Turn a feature idea into a practical implementation plan, file structure, and test checklist.</p><button class="agent-open" data-agent="code" type="button">Open agent <span>↗</span></button>
-        </article>
-        <article class="agent-card" data-agent-card data-search="art director visual style graphics colors logo assets">
-          <div class="agent-card-top"><span class="agent-icon art">✧</span><span class="agent-tag">VISUAL STYLE</span></div><h3>Art Director</h3><p>Explore color palettes, mood, UI language, and original art direction for your project.</p><button class="agent-open" data-agent="art" type="button">Open agent <span>↗</span></button>
-        </article>
-        <article class="agent-card" data-agent-card data-search="qa scout quality assurance test bugs flow accessibility">
-          <div class="agent-card-top"><span class="agent-icon qa">⌕</span><span class="agent-tag">QUALITY CHECK</span></div><h3>QA Scout</h3><p>Check the idea for edge cases, confusing interactions, accessibility, and possible bugs.</p><button class="agent-open" data-agent="qa" type="button">Open agent <span>↗</span></button>
-        </article>
+    <section class="agents-view studio-view" id="agents-view" hidden aria-labelledby="studio-heading">
+      <div class="studio-heading-row">
+        <div><span class="eyebrow">PROMPT → CODE → PREVIEW</span><h2 id="studio-heading">Build something real.</h2><p>Give an LLM an idea. It writes the files, you run the preview, then ask it to change anything.</p></div>
+        <span class="live-llm-badge"><span></span> REAL LLM CODING</span>
       </div>
-      <p class="agent-privacy"><span>✦</span> Agent prompts are handled locally in this demo. Nothing is sent to an AI provider.</p>
+      <div class="studio-toolbar">
+        <div class="provider-summary"><div class="provider-mark">✦</div><div><strong>PromptSim AI engine</strong><span>Multi-model access via Puter.js</span></div></div>
+        <label class="model-picker"><span>MODEL</span><select id="ai-model" aria-label="Choose AI coding model"><option value="gemini-3.8-flash">Gemini 3.8 Flash · Google</option><option value="claude-sonnet-5">Claude Sonnet 5 · Anthropic</option><option value="gpt-5.6-luna">GPT-5.6 Luna · OpenAI</option></select></label>
+        <button class="connect-ai-btn" id="connect-ai" type="button">Sign in to use AI ↗</button>
+      </div>
+      <div class="builder-composer">
+        <label class="field-label" for="builder-prompt">What should the AI build or change?</label>
+        <textarea id="builder-prompt" class="field builder-prompt" rows="4" placeholder="Build a complete retro space exploration game with a title screen, keyboard movement, collectible stars, a minimap, and a purple galaxy UI. Make it playable, not just a mockup." spellcheck="true"></textarea>
+        <div class="prompt-examples"><span>Try:</span><button type="button" data-example="Build a polished personal portfolio website with dark purple gradients, project cards, a contact section, and mobile navigation.">Portfolio</button><button type="button" data-example="Make a playable 2D space survival game with arrow-key movement, drifting asteroids, energy pickups, collision detection, and a restart button.">Space game</button><button type="button" data-example="Create a responsive 2000s-style Flash game portal with animated cards, sound toggles, and a playful blue and lime interface.">Game portal</button></div>
+        <div class="builder-actions"><span class="builder-hint" id="builder-hint">The model writes HTML, CSS, and JavaScript files.</span><button class="create-btn generate-btn" id="generate-app" type="button"><span>✦</span> Build with AI</button></div>
+        <div class="generation-status" id="generation-status" role="status" aria-live="polite"><span class="status-dot"></span><span id="generation-status-text">Ready. Choose a model and describe what to build.</span></div>
+      </div>
+      <div class="studio-layout">
+        <section class="preview-window">
+          <header class="studio-panel-header"><div><span class="window-lights"><i></i><i></i><i></i></span><strong>Live preview</strong><span class="sandbox-tag">SANDBOX</span></div><button class="panel-icon-btn" id="refresh-preview" type="button" title="Refresh preview">↻</button></header>
+          <iframe id="app-preview" title="AI-generated app preview" sandbox="allow-scripts allow-forms" referrerpolicy="no-referrer" loading="lazy" srcdoc="<!doctype html><html><body style='margin:0;background:#100b18;color:#d7c4f3;font:15px system-ui;display:grid;place-items:center;min-height:100vh;text-align:center'><div><div style='font-size:38px'>✦</div><h2>Your creation appears here</h2><p>Describe a website or game, then press Build with AI.</p></div></body></html>"></iframe>
+          <div class="preview-footer"><span><i></i> JavaScript runs in a sandboxed preview</span><span id="preview-size">No build yet</span></div>
+        </section>
+        <section class="editor-window">
+          <header class="studio-panel-header"><div><strong>Source files</strong><span class="file-count" id="file-count">3 files</span></div><button class="panel-icon-btn" id="download-app" type="button" title="Download all source files as ZIP">↓ ZIP</button></header>
+          <nav class="code-tabs" aria-label="Source files"><button class="code-tab active" data-file="html" type="button"><span>◈</span> index.html</button><button class="code-tab" data-file="css" type="button"><span>◈</span> styles.css</button><button class="code-tab" data-file="js" type="button"><span>◈</span> script.js</button></nav>
+          <textarea id="code-editor" class="code-editor" aria-label="Editable project source code" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" placeholder="Generated source will appear here. You can edit it directly."></textarea>
+          <div class="editor-actions"><span id="editor-status">Edit code, then apply it to the preview.</span><button class="secondary-action" id="apply-code" type="button">Apply changes</button></div>
+          <div class="publish-bar"><button class="publish-btn" id="publish-app" type="button">↗ Publish website</button><span id="publish-result">Publish a live copy to your own Puter hosting after building.</span></div>
+        </section>
+      </div>
+      <div class="studio-footnote"><span>ⓘ</span><p><strong>Real AI, not a fake demo.</strong> PromptSim sends your prompt and project code to the model you choose through Puter.js. Sign-in and usage limits may apply. Generated code runs in a sandbox here; review it before publishing.</p><a href="https://docs.puter.com/AI/chat/" target="_blank" rel="noreferrer">AI engine docs ↗</a></div>
     </section>
     <div class="gallery-intro" id="gallery-intro"><div><span class="eyebrow">THE COMMUNITY UNIVERSE</span><h2 id="project-heading">Projects orbiting PromptSim</h2><p id="project-subheading">Explore ideas from their creators — with credit kept in view.</p></div><span class="project-count">CREATOR CREDIT INCLUDED</span></div>
     <aside class="ownership-note" aria-label="Creator ownership and attribution"><span class="ownership-star">✦</span><div><strong>Originals stay original.</strong><p>Creator names stay attached to projects. A remix starts a separate local project with visible inspiration credit; it never edits or replaces the source.</p></div></aside>
@@ -65,15 +80,9 @@
       <button class="create-btn dialog-submit" id="make-project" value="default">＋ Create project</button>
     </form>
   </dialog>
-  <dialog id="agent-dialog" class="create-dialog agent-dialog">
-    <form method="dialog" id="agent-form">
-      <div class="dialog-head"><div><span class="eyebrow">AGENT PLAYGROUND · LOCAL DEMO</span><h2 id="agent-dialog-title">Cosmos Builder</h2><p id="agent-dialog-description" class="agent-dialog-description">Let's map your idea.</p></div><button class="icon-btn" id="close-agent" type="button" aria-label="Close">✕</button></div>
-      <div class="agent-chat" id="agent-chat" aria-live="polite"><div class="chat-bubble assistant"><strong>Ready when you are.</strong><p>Describe a project and this demo will return a structured starter checklist.</p></div></div>
-      <label class="field-label" for="agent-prompt">What should this agent work on?</label><textarea id="agent-prompt" class="field prompt-field" rows="3" placeholder="A galaxy-themed exploration game with strange planets..." required></textarea>
-      <div class="dialog-note">Demo responses are generated in your browser. Connect a backend and AI provider to enable real AI reasoning.</div>
-      <button class="create-btn dialog-submit" id="agent-run" type="button">✦ Run demo agent</button>
-    </form>
-  </dialog>
+  
+  <script src="https://js.puter.com/v2/"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
