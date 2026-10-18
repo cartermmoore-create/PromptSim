@@ -1,5 +1,5 @@
 const starterProjects = [];
-const state = {filter:"Hot",view:"Home",query:"",sort:"Top · Month",custom:[],remixSource:null,studioFiles:{html:"",css:"",js:""},activeFile:"html",isGenerating:false,studioHistory:[],studioVersion:0,attachments:[]};
+const state = {filter:"Hot",view:"Home",query:"",sort:"Top · Month",custom:[],remixSource:null,studioFiles:{html:"",css:"",js:""},activeFile:"html",isGenerating:false,studioHistory:[],studioVersion:0,attachments:[],localEngine:null,loadedModel:"",localModelPromise:null};
 const gallery = document.getElementById("gallery");
 const search = document.getElementById("search");
 const dialog = document.getElementById("create-dialog");
@@ -200,7 +200,7 @@ function refreshAppPreview(){
   updateWorkspaceVersion();
 }
 function parseGeneratedProject(response){
-  let raw=response?.message?.content??response?.text??response;
+  let raw=response?.choices?.[0]?.message?.content??response?.message?.content??response?.text??response;
   if(Array.isArray(raw))raw=raw.map(part=>typeof part==="string"?part:(part?.text||"")).join("\n");
   if(typeof raw!=="string")throw new Error("The model returned an unexpected response format.");
   raw=raw.trim().replace(/^\x60{3}(?:json)?\s*/i,"").replace(/\s*\x60{3}\s*$/,"");
@@ -324,79 +324,101 @@ function buildUserMessage(request){
   if(!currentFiles())return "Build a new project from this request.\n\nUSER REQUEST:\n"+request+attachmentContext+"\n\nReturn complete working files, not a plan.";
   return "Modify the current project according to the user's request below. Preserve unrelated working features. Return the full updated contents of all three files.\n\nUSER REQUEST:\n"+request+attachmentContext+"\n\nCURRENT FILES (edit these, do not discard unrelated behavior):\n--- index.html ---\n"+state.studioFiles.html+"\n--- styles.css ---\n"+state.studioFiles.css+"\n--- script.js ---\n"+state.studioFiles.js;
 }
-async function loadAvailableModels(){
+function loadAvailableModels(){
+  const button=document.getElementById("connect-ai");
   const select=document.getElementById("ai-model");
-  select.replaceChildren();
-  const loading=document.createElement("option");loading.value="";loading.textContent="Loading available models…";select.appendChild(loading);
-  try{
-    if(!window.puter?.ai?.listModels)throw new Error("Model catalogue unavailable");
-    const models=await puter.ai.listModels();
-    const preferred=Array.isArray(models)?models.filter(model=>model&&model.id):[];
-    preferred.sort((a,b)=>{
-      const rank=model=>(/claude/i.test(model.id+" "+(model.name||""))?0:/gpt/i.test(model.id+" "+(model.name||""))?1:/gemini/i.test(model.id+" "+(model.name||""))?2:3);
-      return rank(a)-rank(b)||(a.name||a.id).localeCompare(b.name||b.id);
-    });
-    const usable=preferred.slice(0,120);
-    select.replaceChildren();
-    for(const model of usable){
-      const option=document.createElement("option");
-      option.value=model.id;
-      const provider=model.provider||model.vendor||"";
-      option.textContent=(model.name||model.id)+(provider?" · "+provider:"");
-      select.appendChild(option);
+  if(!navigator.gpu){
+    button.textContent="WebGPU unavailable";
+    setBuildStatus("This browser/device does not expose WebGPU, which the local model requires. Try updating your browser and enabling hardware acceleration.","error");
+  }else{
+    button.textContent="Load model";
+    setBuildStatus("Free local AI is ready. Loading the model downloads it to your browser; no API key or account credits are needed.","info");
+  }
+  select.addEventListener("change",()=>{
+    button.textContent=state.localEngine&&state.loadedModel===select.value?"Model ready ✓":"Load model";
+    if(state.localEngine&&state.loadedModel!==select.value)setBuildStatus("Model selection changed. Press Load model to switch models.","info");
+  });
+}
+async function ensureLocalModel(){
+  const selected=document.getElementById("ai-model").value;
+  if(!selected)throw new Error("Choose a local model first.");
+  if(state.localEngine&&state.loadedModel===selected)return state.localEngine;
+  if(state.localModelPromise)return state.localModelPromise;
+  if(!navigator.gpu)throw new Error("WebGPU is unavailable in this browser or device. Try the latest Chrome or Edge with hardware acceleration enabled.");
+  const button=document.getElementById("connect-ai");
+  button.disabled=true;button.textContent="Loading…";
+  state.localModelPromise=(async()=>{
+    setBuildStatus("Preparing local model. First-time setup downloads model files; this can take a few minutes.","working");
+    const webllm=await import("https://esm.run/@mlc-ai/web-llm");
+    const onProgress=report=>{
+      const message=report?.text||"Loading model weights…";
+      setBuildStatus(message,"working");
+      document.getElementById("builder-hint").textContent=message;
+      document.getElementById("workspace-save-state").textContent="loading model";
+      button.textContent="Loading…";
+    };
+    let engine;
+    if(state.localEngine&&typeof state.localEngine.reload==="function"){
+      engine=state.localEngine;
+      await engine.reload(selected,{initProgressCallback:onProgress});
+    }else{
+      engine=await webllm.CreateMLCEngine(selected,{initProgressCallback:onProgress});
     }
-    if(!usable.length)throw new Error("Puter returned an empty model list");
-    const best=usable.find(model=>/gpt-5\.4-nano/i.test(model.id))||usable.find(model=>/claude/i.test(model.id))||usable.find(model=>/gemini/i.test(model.id))||usable[0];
-    select.value=best.id;
-    setBuildStatus("Model catalogue loaded. Choose a model and describe what to build.","info");
-  }catch(error){
-    console.warn("Could not load Puter model catalogue:",error);
-    select.replaceChildren();
-    const fallback=document.createElement("option");fallback.value="gpt-5.4-nano";fallback.textContent="GPT-5.4 Nano · default model";select.appendChild(fallback);
-    setBuildStatus("Couldn't load the model list. Using Puter's documented default model; sign-in or availability may vary.","error");
+    state.localEngine=engine;state.loadedModel=selected;
+    document.getElementById("workspace-save-state").textContent=currentFiles()?"saved locally":"ready";
+    document.getElementById("builder-hint").textContent="Local model ready. Prompts and generation stay in this browser.";
+    setBuildStatus("Local model ready. Your prompts run on this device; no provider credits are used.","success");
+    button.textContent="Model ready ✓";
+    return engine;
+  })();
+  try{return await state.localModelPromise;}
+  finally{
+    state.localModelPromise=null;button.disabled=false;
+    button.textContent=state.localEngine&&state.loadedModel===document.getElementById("ai-model").value?"Model ready ✓":"Load model";
   }
 }
 async function generateApp(){
   const prompt=document.getElementById("builder-prompt").value.trim();
   if(!prompt){setBuildStatus("Describe the website or game you want to build first.","error");return;}
-  if(!window.puter||!puter.ai||typeof puter.ai.chat!=="function"){
-    setBuildStatus("The AI engine didn't load. Refresh the page or check whether js.puter.com is blocked.","error");return;
-  }
-  if(!document.getElementById("ai-model").value){setBuildStatus("Wait for the model list to finish loading.","error");return;}
   if(state.isGenerating)return;
-  appendWorkspaceMessage("user",prompt);
-  document.getElementById("workspace-project-name").textContent=prompt.slice(0,38)+(prompt.length>38?"…":"");
   state.isGenerating=true;buildButton.disabled=true;buildButton.classList.add("is-loading");
-  document.getElementById("builder-hint").textContent="The LLM is writing real HTML, CSS and JavaScript…";
-  setBuildStatus("Connecting to "+document.getElementById("ai-model").selectedOptions[0].textContent+" and generating files…","working");
   try{
-    const result=await puter.ai.chat([
-      {role:"system",content:CODING_SYSTEM_PROMPT},
-      {role:"user",content:buildUserMessage(prompt)}
-    ],false,{model:document.getElementById("ai-model").value,normalize:true,max_tokens:16000});
+    const engine=await ensureLocalModel();
+    appendWorkspaceMessage("user",prompt);
+    document.getElementById("workspace-project-name").textContent=prompt.slice(0,38)+(prompt.length>38?"…":"");
+    document.getElementById("builder-hint").textContent="The local model is writing HTML, CSS and JavaScript…";
+    setBuildStatus("Generating with "+document.getElementById("ai-model").selectedOptions[0].textContent+" on this device…","working");
+    const result=await engine.chat.completions.create({
+      messages:[
+        {role:"system",content:CODING_SYSTEM_PROMPT},
+        {role:"user",content:buildUserMessage(prompt)}
+      ],
+      temperature:0.2,
+      max_tokens:3400,
+      response_format:{type:"json_object"}
+    });
     const project=parseGeneratedProject(result);
     const hadPrevious=!!currentFiles();
     if(hadPrevious)recordStudioHistory("Before AI edit");
     state.studioFiles=project.files;
     state.studioVersion=hadPrevious?Math.max(1,state.studioVersion||1)+1:1;
-    state.activeFile="html";
-    showActiveCode();refreshAppPreview();
-    document.getElementById("editor-status").textContent="Generated by the selected model. You can edit this code.";
+    state.activeFile="html";showActiveCode();refreshAppPreview();
+    document.getElementById("editor-status").textContent="Generated by the local model. You can edit this code.";
     document.getElementById("file-count").textContent="3 files";
     document.getElementById("builder-hint").textContent=project.summary;
     document.getElementById("preview-size").textContent="AI build ready";
     setBuildStatus("Build complete. Test the preview, edit source, or ask for another change.","success");
-    appendWorkspaceMessage("assistant",project.summary+"\n\nGenerated index.html, styles.css, and script.js. Use the source-code tool to inspect and edit them.");
+    appendWorkspaceMessage("assistant",project.summary+"\n\nGenerated index.html, styles.css, and script.js locally. The model did not call a remote AI API.");
     document.getElementById("workspace-save-state").textContent="saved locally";
     updateWorkspaceVersion();renderStudioHistory();
     state.attachments=[];attachmentInput.value="";document.getElementById("attachment-label").textContent="Optional source context";
-    state.remixSource=null;
+    state.remixSource=null;document.getElementById("builder-prompt").value="";
   }catch(error){
-    console.error("PromptSim AI build failed:",error);
+    console.error("PromptSim local AI build failed:",error);
     const message=error?.message||String(error);
-    setBuildStatus("AI build failed: "+message+" — check model access/sign-in and try again.","error");
-    appendWorkspaceMessage("assistant","The build failed and your previous code was preserved. "+message+" Check model access or sign-in, then try again.");
-    document.getElementById("builder-hint").textContent="The model did not change your current project.";
+    setBuildStatus("Local build failed: "+message,"error");
+    appendWorkspaceMessage("assistant","The build failed and your previous code was preserved. "+message);
+    document.getElementById("builder-hint").textContent="Try a smaller request or switch to the lighter local model.";
   }finally{
     state.isGenerating=false;buildButton.disabled=false;buildButton.classList.remove("is-loading");
   }
@@ -410,16 +432,13 @@ document.querySelectorAll("[data-example]").forEach(button=>button.addEventListe
   document.getElementById("builder-prompt").focus();
 }));
 document.getElementById("connect-ai").addEventListener("click",async()=>{
-  if(!window.puter?.auth?.signIn){setBuildStatus("Puter AI couldn't load. Refresh this page and try again.","error");return;}
-  const button=document.getElementById("connect-ai");
-  button.disabled=true;
-  try{
-    await puter.auth.signIn();
-    button.textContent="AI account connected ✓";
-    setBuildStatus("Account connected. Choose a coding model and build your project.","success");
-  }catch(error){
-    setBuildStatus("Sign-in was cancelled or failed: "+(error?.message||String(error)),"error");
-  }finally{button.disabled=false;}
+  try{await ensureLocalModel();}
+  catch(error){
+    console.error("Could not load local model:",error);
+    setBuildStatus("Could not load local model: "+(error?.message||String(error)),"error");
+    document.getElementById("builder-hint").textContent="This requires a WebGPU-compatible browser and enough graphics memory. No API key or credits are required.";
+    document.getElementById("connect-ai").textContent="Retry model load";
+  }
 });
 document.querySelectorAll(".code-tab").forEach(button=>button.addEventListener("click",()=>{
   state.studioFiles[state.activeFile]=codeEditor.value;
@@ -461,31 +480,10 @@ document.getElementById("download-app").addEventListener("click",async()=>{
   }catch(error){setBuildStatus("Download failed: "+(error?.message||String(error)),"error");}
   finally{button.disabled=false;}
 });
-document.getElementById("publish-app").addEventListener("click",async()=>{
-  if(!currentFiles()){setBuildStatus("Build a website before publishing.","error");return;}
-  if(!window.puter?.fs||!window.puter?.hosting){setBuildStatus("Puter hosting tools didn't load. Refresh and try again.","error");return;}
-  const button=document.getElementById("publish-app");const result=document.getElementById("publish-result");
-  button.disabled=true;result.textContent="Uploading your source files to your own hosting…";
-  try{
-    if(puter.auth?.isSignedIn&&!await puter.auth.isSignedIn())await puter.auth.signIn();
-    state.studioFiles[state.activeFile]=codeEditor.value;
-    const folder="promptsim-"+puter.randName().toLowerCase().replace(/[^a-z0-9-]/g,"-");
-    const subdomain=folder.slice(0,42);
-    await puter.fs.mkdir(folder);
-    await puter.fs.write(folder+"/index.html",state.studioFiles.html);
-    await puter.fs.write(folder+"/styles.css",state.studioFiles.css);
-    await puter.fs.write(folder+"/script.js",state.studioFiles.js);
-    const site=await puter.hosting.create(subdomain,folder);
-    const url=site.url||("https://"+site.subdomain+".puter.site");
-    result.replaceChildren();
-    const link=document.createElement("a");link.href=url;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Open published website ↗";
-    result.appendChild(link);
-    setBuildStatus("Website published. Use the link beside the publish button to open it.","success");
-  }catch(error){
-    console.error("PromptSim publish failed:",error);
-    result.textContent="Publish failed. Check Puter sign-in, site-name availability, and hosting access.";
-    setBuildStatus("Could not publish: "+(error?.message||String(error)),"error");
-  }finally{button.disabled=false;}
+document.getElementById("publish-app").addEventListener("click",()=>{
+  if(!currentFiles()){setBuildStatus("Build a project before exporting it.","error");return;}
+  setBuildStatus("Exporting your website source as a ZIP. You can publish the downloaded files with GitHub Pages or another static host.","info");
+  document.getElementById("download-app").click();
 });
 loadStudioLocally();
 loadAvailableModels();
