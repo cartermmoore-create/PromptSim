@@ -122,7 +122,7 @@ try{const saved=JSON.parse(localStorage.getItem("promptsim-projects")||"[]");sta
 const CODING_SYSTEM_PROMPT = `You are PromptSim's senior AI coding agent. You build complete, original, runnable websites and browser games from user requests.
 Return ONLY one valid JSON object with exactly these keys: "html", "css", "js", "summary". Every value must be a JSON string. Do not wrap the JSON in Markdown fences and do not output any other prose.
 "html" must be a complete HTML5 document. It must link to ./styles.css in the head and ./script.js near the end of body. "css" must contain all custom styles. "js" must contain the real interactive behavior.
-Write real working code, not a static mockup or a checklist. Buttons, navigation, forms, menus, game controls, scoring, restart/reset, and responsive behavior must actually work when requested. Use semantic accessible HTML and responsive CSS. Avoid placeholder TODOs. If the request is a game, implement the game loop/input/collisions/scoring and restart behavior. Use original visuals and text. Do not clone any named existing project or copy supplied creator projects.
+Write real working code, not a static mockup or a checklist. This local model has a small context window, so keep source files concise and avoid huge comments or unnecessary markup. Implement a focused playable version well rather than an oversized project. Buttons, navigation, forms, menus, game controls, scoring, restart/reset, and responsive behavior must actually work when requested. Use semantic accessible HTML and responsive CSS. Avoid placeholder TODOs. If the request is a game, implement the game loop/input/collisions/scoring and restart behavior. Use original visuals and text. Do not clone any named existing project or copy supplied creator projects.
 Do not include any secret keys. Do not rely on server APIs unless the user specifically asks; prefer an all-client-side project suitable for static hosting. Keep external dependencies minimal and mention them in summary. Don't use document.write. Protect against HTML injection when rendering user-entered content.
 If revising a project, preserve its working features and apply the user's requested changes rather than replacing unrelated parts. The summary should briefly describe what was built or changed.`;
 const codeEditor=document.getElementById("code-editor");
@@ -388,13 +388,19 @@ async function generateApp(){
     document.getElementById("workspace-project-name").textContent=prompt.slice(0,38)+(prompt.length>38?"…":"");
     document.getElementById("builder-hint").textContent="The local model is writing HTML, CSS and JavaScript…";
     setBuildStatus("Generating with "+document.getElementById("ai-model").selectedOptions[0].textContent+" on this device…","working");
+    const userContent=buildUserMessage(prompt);
+    const estimatedInputTokens=Math.ceil((CODING_SYSTEM_PROMPT.length+userContent.length)/3.5);
+    if(estimatedInputTokens>3200){
+      throw new Error("This project is too large for the local model's 4K context window. Try a smaller change or simplify the current code first.");
+    }
+    const outputBudget=Math.max(700,Math.min(3000,3800-estimatedInputTokens));
     const result=await engine.chat.completions.create({
       messages:[
         {role:"system",content:CODING_SYSTEM_PROMPT},
-        {role:"user",content:buildUserMessage(prompt)}
+        {role:"user",content:userContent}
       ],
       temperature:0.2,
-      max_tokens:3400,
+      max_tokens:outputBudget,
       response_format:{type:"json_object"}
     });
     const project=parseGeneratedProject(result);
