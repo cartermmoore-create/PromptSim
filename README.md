@@ -10,7 +10,7 @@ https://cartermmoore-create.github.io/PromptSim/
 
 The public GitHub Pages version is a static website. OpenAI currently limits direct ChatGPT-plan usage to eligible open-source/local apps and approved hosted integrations. PromptSim is set up for the supported local-runtime path; requesting hosted access is a separate step. See the [official open-source SIWC docs](https://developers.openai.com/siwc/token-sharing-open-source) and [hosted access request](https://openai.com/form/sign-in-with-chatgpt-interest/).
 
-### Run PromptSim locally (recommended)
+### Run with your ChatGPT plan
 
 This does **not** download or run a language model on your computer. The local process securely connects to your ChatGPT account, while OpenAI runs the model and the generated website/game plays in the browser preview.
 
