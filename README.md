@@ -2,18 +2,22 @@
 
 A lightweight, WebSim-inspired discovery gallery for prompt-built projects.
 
-## Run locally
-Open `index.html` in your browser. No build step or dependencies are required.
+## Open the website
+
+**Live website:** https://cartermmoore-create.github.io/PromptSim/
+
+GitHub Actions automatically publishes the static site to GitHub Pages whenever changes are pushed to `main`. On the first deployment, GitHub may take a few minutes to publish it. Check the repository's **Actions** tab for the deployment status.
 
 ## Features
 - Dark responsive discovery UI with top search, category filters, and a right-side navigation rail
 - Project cards with illustrated SVG thumbnail art, creators, views, and likes
 - Search by project name, creator, prompt, or category
-- Create a project from a prompt and save it in local browser storage
+- Create a project from a prompt and save it in the visitor's browser
 - Preview and remix project prompts
-- Responsive two-column mobile and four-column desktop gallery
+- Responsive layout for desktop and mobile
 
-## GitHub Pages
-In the repository settings, open **Pages**, set the deployment source to **Deploy from a branch**, choose `main` and `/ (root)`, then save.
+## Run locally
+Open `index.html` in your browser. No build step or dependencies are required.
 
-PromptSim is a static frontend starter. Project creation currently stores entries in the visitor's browser; it does not generate a working game or website from the prompt and does not sync projects between users.
+## Important note
+This is a static frontend starter. Creating a project currently saves its title and prompt in the visitor's browser; it does not generate a working game or website from the prompt, and projects do not sync between users. Real AI generation and shared projects require a backend or API integration.
