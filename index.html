@@ -42,7 +42,9 @@
             <button class="workspace-device-btn active" type="button" data-preview-mode="desktop" title="Desktop preview">▰</button>
             <button class="workspace-device-btn" type="button" data-preview-mode="mobile" title="Mobile preview">▯</button>
           </div>
+          <nav class="workspace-mode-tabs" aria-label="Workspace tools"><button class="workspace-mode active" type="button" data-workspace-mode="Build">Build</button><button class="workspace-mode" id="workspace-history" type="button">◴ History</button></nav>
           <div class="workspace-version-group"><span class="workspace-version" id="workspace-version">v1 draft</span><span class="workspace-draft-dot"></span><span id="workspace-save-state">unsaved</span></div>
+          <button class="workspace-post" id="publish-app" type="button" title="Publish this website using your Puter account">Post ↗</button>
         </header>
         <div class="workspace-main">
           <section class="workspace-preview-column" aria-label="Live project preview">
@@ -64,10 +66,7 @@
             <footer class="workspace-preview-footer"><span><i></i> Sandboxed preview</span><span id="preview-size">No build yet</span><button id="workspace-code-toggle" type="button">⌘ Source code</button></footer>
           </section>
           <aside class="workspace-agent-panel" aria-label="AI coding agent">
-            <header class="workspace-agent-header">
-              <nav class="workspace-mode-tabs" aria-label="Workspace tools"><button class="workspace-mode active" type="button" data-workspace-mode="Build">✧ Build</button><button class="workspace-mode" id="workspace-history" type="button">◴ History</button></nav>
-              <button class="workspace-post" id="publish-app" type="button" title="Publish this website using your Puter account">Post ↗</button>
-            </header>
+            
             <div class="workspace-agent-context"><span class="agent-context-icon">✦</span><div><strong>PromptSim Agent</strong><span>Code · Preview · Iterate</span></div><button id="connect-ai" class="workspace-signin" type="button">Sign in</button></div><span id="publish-result" class="workspace-publish-result" aria-live="polite"></span>
             <div class="workspace-chat" id="workspace-chat" aria-live="polite">
               <div class="workspace-chat-empty" id="workspace-chat-empty"><div class="workspace-chat-spark">✦</div><h2>What should we change?</h2><p>Describe what you want to build. The coding agent creates the files and runs them in the preview. Follow-up prompts can edit the existing code.</p></div>
