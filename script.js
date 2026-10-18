@@ -175,7 +175,7 @@ function injectPreviewFiles(){
   let html=state.studioFiles.html||"<!doctype html><html><head><meta charset='utf-8'><title>PromptSim preview</title></head><body></body></html>";
   // Report sandbox runtime errors to the parent so the agent can repair real failures.
   const runtimeBridge="<script>(function(){function report(kind,message){try{parent.postMessage({type:'promptsim-preview-error',kind:kind,message:String(message||'Unknown preview error').slice(0,1000)},'*')}catch(e){}}window.addEventListener('error',function(e){report('error',(e.message||'Script error')+(e.filename?' at '+e.filename.split('/').pop():'')+(e.lineno?':'+e.lineno:''))});window.addEventListener('unhandledrejection',function(e){report('promise',e.reason&&e.reason.message?e.reason.message:e.reason)});})();<\/script>";
-  if(/<head\\b[^>]*>/i.test(html))html=html.replace(/<head\\b[^>]*>/i,match=>match+"\\n"+runtimeBridge);
+  if(/<head\b[^>]*>/i.test(html))html=html.replace(/<head\b[^>]*>/i,match=>match+"\n"+runtimeBridge);
   else html=runtimeBridge+html;
   // srcdoc cannot resolve the project's separate local files, so inline the CSS and JS into the preview only.
   html=html.replace(/<link\b[^>]*href=["'][^"']*styles\.css[^"']*["'][^>]*>/ig,"");
@@ -449,6 +449,8 @@ async function generateApp(){
     if(hadPrevious)recordStudioHistory("Before AI edit");
     state.studioFiles=project.files;
     state.studioVersion=hadPrevious?Math.max(1,state.studioVersion||1)+1:1;
+    state.previewErrors=[];
+    document.getElementById("fix-preview-errors").hidden=true;
     state.activeFile="html";showActiveCode();refreshAppPreview();
     document.getElementById("editor-status").textContent="Generated remotely through ChatGPT. You can edit this code.";
     document.getElementById("file-count").textContent="3 files";
